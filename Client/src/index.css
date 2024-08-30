@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ensure buttons are positioned correctly */
+button.slick-next,
+button.slick-prev {
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* Make the button circular */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none; /* Remove default border if any */
+    background-color: transparent; /* Remove any default background */
+}
+
+/* Style for the "next" button */
+button.slick-next {
+    right: -10px;
+}
+
+button.slick-next::before {
+    content: '\276F'; /* Right arrow */
+    color: #45624E;
+    background-color: #E4E6D9;
+    width: 100%;
+    height: 100%;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%; /* Circular background */
+}
+
+/* Style for the "prev" button */
+button.slick-prev {
+    left: -10px;
+}
+
+button.slick-prev::before {
+    content: '\276E'; /* Left arrow */
+    color: #45624E;
+    background-color: #E4E6D9;
+    width: 100%;
+    height: 100%;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%; /* Circular background */
+}
+
+@keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+}
+  
+.animate-spin-slow {
+    animation: spin 8s linear infinite;
+}
+
+.art-word {
+    font-size: 70px;
+    font-weight: bold;
+    color: white; /* Text fill color */
+    -webkit-text-stroke: 2px #0000ff; /* Blue outline */
+    text-transform: uppercase; /* Make text uppercase */
+  }
+
+  .art-word-shadow {
+    font-size: 60px;
+    font-weight: bold;
+    color: white; /* Text fill color */
+    text-shadow: 
+      -1px -1px 0 #45624E,
+      1px -1px 0 #45624E,
+      -1px 1px 0 #45624E,
+      1px 1px 0 #45624E; 
+    text-transform: uppercase; /* Make text uppercase */
+  }
+
+  .art-word-shadow-logo {
+    font-size: 25px;
+    font-weight: bold;
+    word-spacing: 5px;
+    color: white; /* Text fill color */
+    text-shadow: 
+      -1px -1px 0 #45624E,
+      1px -1px 0 #45624E,
+      -1px 1px 0 #45624E,
+      1px 1px 0 #45624E; 
+    text-transform: uppercase;
+  }
+
+  .gradient-text-logo {
+    font-size: 35px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: linear-gradient(to right, #45624E, #82ac90, #416c4f); 
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .gradient-text {
+    font-size: 75px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: linear-gradient(to right, #ff7e5f, #feb47b); /* Gradient colors */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .custom-title {
+    font-family: 'poppins', sans-serif; /* Hoặc tên font chữ bạn muốn */
+    font-size: 24px;
+    color: #ff6347;
+  }
+
+  .custom-text {
+    font-family: 'poppins', sans-serif; /* Hoặc tên font chữ bạn muốn */
+    font-size: 46px;
+    color: #333;
+  }
+  
+  /* Đặt font chữ cho các nút */
+  .custom-confirm-button {
+    font-family: 'poppins', sans-serif; /* Hoặc tên font chữ bạn muốn */
+    background-color: #28a745;
+    border: none;
+    color: #fff;
+  }
+  
+  .custom-cancel-button {
+    font-family: 'poppins', sans-serif; /* Hoặc tên font chữ bạn muốn */
+    background-color: #dc3545;
+    border: none;
+    color: #fff;
+  }
+
+  .group:hover {
+    width: auto; /* Kéo dài nút khi hover */
+    padding-right: 20px; /* Tạo khoảng trống đủ để hiển thị chữ */
+  }
+  
+  .group span {
+    white-space: nowrap; /* Đảm bảo văn bản không bị xuống dòng */
+  }
+  
+  .my-masonry-grid {
+    display: -webkit-box; /* Not needed if autoprefixing */
+    display: -ms-flexbox; /* Not needed if autoprefixing */
+    display: flex;
+    margin-left: -30px; /* gutter size offset */
+    width: auto;
+  }
+  .my-masonry-grid_column {
+    padding-left: 30px; /* gutter size */
+    background-clip: padding-box;
+  }
+  
+  /* Style your items */
+  .my-masonry-grid_column > div { /* change div to reference your elements you put in <Masonry> */
+    background: grey;
+    margin-bottom: 30px;
+  }
+
+
+  
+
