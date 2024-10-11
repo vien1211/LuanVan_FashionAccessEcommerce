@@ -12,7 +12,7 @@ const Modal = ({ children }) => {
       className="fixed inset-0 z-50 flex items-center justify-center"
       style={{
         zIndex: "9999",
-        backgroundColor: "rgba(0, 0, 0, 0.7)", // Adjust the opacity value (0.0 - 1.0)
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
       }}
     >
       <div className="absolute inset-0 flex items-center justify-center">

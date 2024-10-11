@@ -1,6 +1,7 @@
 import path from "./path";
 import icons from "./icons";
 
+
 export const navigation = [
   {
     id: 1,
@@ -10,7 +11,7 @@ export const navigation = [
   {
     id: 2,
     value: "PRODUCTS",
-    path: `/${path.PRODUCT_LIST}`,
+    path: `/${path.PRODUCTS}`,
   },
   {
     id: 3,
@@ -30,7 +31,7 @@ export const navigation = [
  
 ];
 
-export const colors = ["black", "gray", "be", "pink", "white", "green"];
+export const colors = ["Black", "Blue", "Beige", "Pink", "White", "Green", "Pink Gold", "White Gold", "Gold", "Brown"];
 
 export const sorts = [
   {
@@ -104,7 +105,12 @@ const {
   RiHistoryLine,
   PiListHeartBold,
   SiBraintree,
-  SiC
+  SiC,
+  RiLoginCircleLine,
+  FaTruckMonster,
+  PiWarehouseFill,
+  TbPackageImport,
+  FaBlog
 } = icons;
 
 export const adminSidebar = [
@@ -184,6 +190,65 @@ export const adminSidebar = [
       },
     ],
   },
+  {
+    id: 8,
+    type: "PARENT",
+    text: "Manage Supplier",
+    icon: <FaTruckMonster size={20} />,
+    submenu: [
+      {
+        text: "Add Supplier",
+        path: `/${path.ADMIN}/${path.ADD_SUPPLIER}`,
+      },
+      {
+        text: "Manage Supplier",
+        path: `/${path.ADMIN}/${path.MANAGE_SUPPLIER}`,
+      },
+    ],
+  },
+  {
+    id: 9,
+    type: "SINGLE",
+    text: "Inventory",
+    path: `/${path.ADMIN}/${path.INVENTORY}`,
+    icon: <PiWarehouseFill size={20} />,
+  },
+  {
+    id: 10,
+    type: "PARENT",
+    text: "Goods Receipt",
+    icon: <TbPackageImport size={20} />,
+    submenu: [
+      {
+        text: "Import Goods",
+        path: `/${path.ADMIN}/${path.IMPORT_GOODS}`,
+      },
+      {
+        text: "Manage Goods Receipt",
+        path: `/${path.ADMIN}/${path.MANAGE_GOODS_RECEIPT}`,
+      },
+    ],
+  },
+  {
+    id: 11,
+    type: "PARENT",
+    text: "Blog",
+    icon: <TbPackageImport size={20} />,
+    submenu: [
+      {
+        text: "Manage Blog Category",
+        path: `/${path.ADMIN}/${path.MANAGE_BLOG_CATEGORY}`,
+      },
+      {
+        text: "Create Blog Post",
+        path: `/${path.ADMIN}/${path.CREATE_BLOG_POST}`,
+      },
+      {
+        text: "Manage Blog Post",
+        path: `/${path.ADMIN}/${path.MANAGE_BLOG_POST}`,
+      },
+    ],
+  },
 ];
 
 export const memberSidebar = [
@@ -201,27 +266,35 @@ export const memberSidebar = [
     path: `/${path.MEMBER}/${path.PERSONAL}`,
     icon: <BsFillPersonFill size={20} />,
   },
+  // {
+  //   id: 3,
+  //   type: "SINGLE",
+  //   text: "My Cart",
+  //   path: `/${path.MEMBER}/${path.MY_CART}`,
+  //   icon: <HiShoppingBag size={20} />,
+  // },
   {
     id: 3,
-    type: "SINGLE",
-    text: "My Cart",
-    path: `/${path.MEMBER}/${path.MY_CART}`,
-    icon: <HiShoppingBag size={20} />,
-  },
-  {
-    id: 4,
     type: "SINGLE",
     text: "Ordered History",
     path: `/${path.MEMBER}/${path.HISTORY}`,
     icon: <RiHistoryLine size={20} />,
   },
   {
-    id: 5,
+    id: 4,
     type: "SINGLE",
     text: "WishList",
     path: `/${path.MEMBER}/${path.WISHLIST}`,
     icon: <PiListHeartBold size={20} />,
   },
+  {
+    id: 5,
+    type: "SINGLE",
+    text: "Blog List",
+    path: `/${path.MEMBER}/${path.M_BLOG_LIST}`,
+    icon: <FaBlog size={20} />,
+  },
+  
 ];
 
 export const roles = [
@@ -244,4 +317,52 @@ export const blockStatus = [
     code: false,
     value: "Active",
   },
+];
+
+export const statusOrder = [
+  {
+    label: "Cancelled",
+    value: "Cancelled",
+  },
+  {
+    label: "Awaiting",
+    value: "Awaiting Confirmation",
+  },
+  {
+    label: "Processing",
+    value: "Processing",
+  },
+  {
+    label: "On The Way",
+    value: "On The Way",
+  },
+  {
+    label: "Shipped",
+    value: "Shipped",
+  },
+  {
+    label: "On Delivery",
+    value: "On Delivery",
+  },
+  {
+    label: "Delivered",
+    value: "Delivered",
+  },
+  {
+    label: "Success",
+    value: "Success",
+  },
+];
+
+export const paymentStatuses = [
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Paid', label: 'Paid' },
+  { value: 'Failed', label: 'Failed' },
+];
+
+export const dateOptions = [
+  { label: 'Hôm nay', value: 'today' },
+  { label: 'Hôm qua', value: 'yesterday' },
+  { label: '3 ngày trước', value: 'threeDaysAgo' },
+  { label: 'Tất cả', value: 'all' }
 ];

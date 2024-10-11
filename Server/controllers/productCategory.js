@@ -2,7 +2,7 @@ const ProductCategory = require("../models/productCategory");
 const Product = require("../models/product");
 const asyncHandler = require("express-async-handler");
 const { response } = require("express");
-
+const slugify = require("slugify");
 // const createCategory = asyncHandler(async (req, res) => {
 //   const response = await ProductCategory.create(req.body);
 //   return res.json({
@@ -17,7 +17,7 @@ const createCategory = async (req, res) => {
   try {
     const { title } = req.body;
     const image = req.file ? req.file.path : null; // Access the path provided by Cloudinary
-
+    req.body.slug = slugify(title);
     console.log('Title:', title); // Log title
     console.log('Image:', image); // Log image path
 

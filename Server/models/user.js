@@ -36,16 +36,26 @@ var userSchema = new mongoose.Schema({
     cart: [{
         product: {type: mongoose.Types.ObjectId, ref: 'Product'},
         quantity: Number,
-        color: String
+        color: String,
+        price: Number,
+        image: String,
+        title: String
     }],
     address:String,
     wishlist: [
         {type: mongoose.Types.ObjectId, ref: 'Product'}
     ],
+    likes: [
+        { type: mongoose.Types.ObjectId, ref: 'Blog' }
+    ],  
+    dislikes: [
+        { type: mongoose.Types.ObjectId, ref: 'Blog' }
+    ],
     isBlocked: {
         type: Boolean,
         default: false
     },
+    loginAttempts: { type: Number, default: 0 },
     refreshToken: { 
         type: String,
     },

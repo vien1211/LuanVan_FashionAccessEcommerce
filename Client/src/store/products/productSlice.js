@@ -4,7 +4,7 @@ import * as actions from './AsyncActions';
 export const productSlice = createSlice({
   name: 'products',
   initialState: {
-    products: [], // Thêm state để lưu danh sách tất cả sản phẩm
+    products: [], 
     isLoading: false,
     errorMessage: '',
   },

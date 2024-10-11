@@ -20,6 +20,15 @@ export const apiLogin = async (data) => {
     }
 };
 
+export const apiGoogleLogin = async (data) => {
+  try {
+      const response = await axios.post('/auth/google-login', data);
+      return response; 
+  } catch (error) {
+      throw error; 
+  }
+};
+
 export const apiForgotPassword = async (data) => {
   try {
       const response = await axios.post('/user/forgotpassword', data);
@@ -52,6 +61,12 @@ export const apiGetAllUser = (params) => axios({
   params
 })
 
+export const apiGetUserToday = (params) => axios({
+  url: '/user/user-today',
+  method: 'get',
+  params
+})
+
 export const apiUpdateUser = (data, uid) => axios({
   url: '/user/' +uid,
   method: 'put',
@@ -67,4 +82,20 @@ export const apiUpdateCurrent = (data) => axios({
   url: '/user/current',
   method: 'put',
   data
+})
+
+export const apiUpdateCart = (data) => axios({
+  url: '/user/cart',
+  method: 'put',
+  data
+})
+
+export const apiRemoveCart = (pid, color) => axios({
+  url: `/user/remove-cart/${pid}/${color}`,
+  method: 'delete',
+})
+
+export const apiUpdateWishlist = (pid) => axios({
+  url: `/user/wishlist/` + pid,
+  method: 'put',
 })

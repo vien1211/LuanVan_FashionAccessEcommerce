@@ -14,7 +14,7 @@ export const getAllProducts = createAsyncThunk(
     try {
       const response = await apis.apiGetProducts(queries);
       if (response.success) {
-        return response.products; // Giả sử API trả về danh sách sản phẩm trong `products`
+        return response.productData; 
       } else {
         return rejectWithValue(response.error);
       }

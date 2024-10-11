@@ -110,6 +110,12 @@ const CreateProduct = () => {
           text: "Create Product Successfully!",
           icon: "success",
           confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+            
+          },
         });
         reset();
         setPayload({
@@ -121,6 +127,12 @@ const CreateProduct = () => {
           text: "Failed to Create Product!",
           icon: "error",
           confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+           
+          },
         });
       }
     }
@@ -228,7 +240,7 @@ const CreateProduct = () => {
               type="number"
             />
 
-            <InputForm
+            {/* <InputForm
               label="Quantity"
               register={register}
               errors={errors}
@@ -240,7 +252,7 @@ const CreateProduct = () => {
               style="flex-auto rounded-md"
               placeholder="Quantity"
               type="number"
-            />
+            /> */}
 
             <InputForm
               label="Color"

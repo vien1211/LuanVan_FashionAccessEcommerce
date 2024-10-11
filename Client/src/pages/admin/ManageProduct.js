@@ -136,6 +136,12 @@ const ManageProduct = () => {
       showCancelButton: true,
       confirmButtonText: "Yes, delete it!",
       cancelButtonText: "No, keep it",
+      customClass: {
+        title: "custom-title",
+        text: "custom-text",
+        confirmButton: "custom-confirm-button",
+        cancelButton: "custom-cancel-button",
+      },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -147,6 +153,12 @@ const ManageProduct = () => {
               text: response.mes || "Product has been deleted.",
               icon: "success",
               confirmButtonText: "OK",
+              customClass: {
+                title: "custom-title",
+                text: "custom-text",
+                confirmButton: "custom-confirm-button",
+                cancelButton: "custom-cancel-button",
+              },
             });
           } else {
             Swal.fire({
@@ -154,6 +166,12 @@ const ManageProduct = () => {
               text: response.mes || "Failed to delete product.",
               icon: "error",
               confirmButtonText: "OK",
+              customClass: {
+                title: "custom-title",
+                text: "custom-text",
+                confirmButton: "custom-confirm-button",
+                cancelButton: "custom-cancel-button",
+              },
             });
           }
         } catch (error) {
@@ -162,6 +180,12 @@ const ManageProduct = () => {
             text: "An error occurred while deleting this product.",
             icon: "error",
             confirmButtonText: "OK",
+            customClass: {
+              title: "custom-title",
+              text: "custom-text",
+              confirmButton: "custom-confirm-button",
+              cancelButton: "custom-cancel-button",
+            },
           });
         }
       }
@@ -281,7 +305,7 @@ const ManageProduct = () => {
                 )}
               </th>
 
-              <th className="px-2 py-2 relative">
+              {/* <th className="px-2 py-2 relative">
                 <div className="flex items-center gap-2">
                   Quantity{" "}
                   <HiFilter onClick={() => toggleSortOptions("quantity")} />
@@ -299,7 +323,7 @@ const ManageProduct = () => {
                     ))}
                   </div>
                 )}
-              </th>
+              </th> */}
 
               <th className="px-2 py-2 relative">
                 <div className="flex items-center gap-2">
@@ -393,7 +417,10 @@ const ManageProduct = () => {
                 <td className="px-2 py-2">{el.category}</td>
                 <td className="px-2 py-2">{el.brand}</td>
                 <td className="px-2 py-2">{el.price}</td>
-                <td className="px-2 py-2">{el.quantity}</td>
+                {/* <td className="px-2 py-2">
+                {el.stock?.quantity || 0}
+                
+                </td> */}
                 <td className="px-2 py-2">{el.sold}</td>
                 <td className="px-2 py-2">{el.color}</td>
                 <td className="px-2 py-2">{el.totalRatings}</td>

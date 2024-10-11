@@ -6,7 +6,8 @@ module.exports = {
   ],
   theme: {
     fontFamily: {
-      main: ['Poppins', 'sans-serif']
+      main: ['Poppins', 'sans-serif'],
+      playfair: ['"Playfair Display"', 'sans-serif'],
     },
     listStyleType: {
       none: 'none',
@@ -24,6 +25,12 @@ module.exports = {
       },
       colors: {
         main: "#6D8777",
+      },
+
+      gridTemplateRows: {
+        '10': 'repeat(10, minmax(0, 1fr))',
+
+        'layout': '200px minmax(900px, 1fr) 100px',
       },
       
       keyframes: {
@@ -49,6 +56,30 @@ module.exports = {
           },
         },
 
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideInLeft: {
+          '0%': { transform: 'translateX(-50px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideInRight: {
+          '0%': { transform: 'translateX(50px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideInUp: {
+          '0%': { transform: 'translateY(50px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        rotateIn: {
+          '0%': { transform: 'rotate(-90deg)', opacity: '0' },
+          '100%': { transform: 'rotate(0)', opacity: '1' },
+        },
+        CartInRight: {
+          '0%': { transform: 'translateX(50px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
 
       },
 
@@ -56,7 +87,12 @@ module.exports = {
         'spin-slow': 'spin 8s linear infinite',
         'scale-up-center': 'scale-up-center 0.8s cubic-bezier(0.390, 0.575, 0.565, 1.000) both',
         'slide-fwd-center': 'slide-fwd-center 0.45s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
-        
+        'fadeIn': 'fadeIn 1.5s ease-in',
+        'slideInLeft': 'slideInLeft 1.5s ease-in-out',
+        'slideInRight': 'slideInRight 1.5s ease-in-out',
+        'slideInUp': 'slideInUp 1.5s ease-out',
+        'rotateIn': 'rotateIn 1.5s ease-out',
+        'CartInRight': 'CartInRight 0.5s ease-in-out',
       },
       
     },

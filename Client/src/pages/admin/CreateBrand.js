@@ -28,6 +28,11 @@ const CreateBrand = () => {
         text: "Please select an image.",
         icon: "error",
         confirmButtonText: "OK",
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+        },
       });
       return;
     }
@@ -43,6 +48,11 @@ const CreateBrand = () => {
         text: "Create Brand Successfully!",
         icon: "success",
         confirmButtonText: "OK",
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+        },
       });
       reset();
       setImagePreview(null);
@@ -52,6 +62,11 @@ const CreateBrand = () => {
         text: response.mes || "Failed to Create Brand!",
         icon: "error",
         confirmButtonText: "OK",
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+        },
       });
     }
   };

@@ -87,6 +87,12 @@ const ManageUser = () => {
         text: response.mes || "Update successful!",
         icon: "success",
         confirmButtonText: "OK",
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+          cancelButton: "custom-cancel-button",
+        },
       });
     } else {
       Swal.fire({
@@ -94,6 +100,12 @@ const ManageUser = () => {
         text: response.mes || "Invalid credentials!",
         icon: "error",
         confirmButtonText: "OK",
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+          cancelButton: "custom-cancel-button",
+        },
       });
     }
   };
@@ -106,6 +118,12 @@ const ManageUser = () => {
       showCancelButton: true,
       confirmButtonText: "Yes, delete it!",
       cancelButtonText: "No, keep it",
+      customClass: {
+        title: "custom-title",
+        text: "custom-text",
+        confirmButton: "custom-confirm-button",
+        cancelButton: "custom-cancel-button",
+      },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -117,6 +135,12 @@ const ManageUser = () => {
               text: response.mes || "User has been deleted.",
               icon: "success",
               confirmButtonText: "OK",
+              customClass: {
+                title: "custom-title",
+                text: "custom-text",
+                confirmButton: "custom-confirm-button",
+                cancelButton: "custom-cancel-button",
+              },
             });
           } else {
             Swal.fire({
@@ -124,6 +148,12 @@ const ManageUser = () => {
               text: response.mes || "Failed to delete user.",
               icon: "error",
               confirmButtonText: "OK",
+              customClass: {
+                title: "custom-title",
+                text: "custom-text",
+                confirmButton: "custom-confirm-button",
+                cancelButton: "custom-cancel-button",
+              },
             });
           }
         } catch (error) {
@@ -132,6 +162,12 @@ const ManageUser = () => {
             text: "An error occurred while deleting the user.",
             icon: "error",
             confirmButtonText: "OK",
+            customClass: {
+              title: "custom-title",
+              text: "custom-text",
+              confirmButton: "custom-confirm-button",
+              cancelButton: "custom-cancel-button",
+            },
           });
         }
       }

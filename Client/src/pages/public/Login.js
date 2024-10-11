@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import path from "../../ultils/path";
 import { InputField, Button, Loading } from "../../components";
-import { apiRegister, apiLogin, apiForgotPassword } from "../../apis/user";
+import { apiRegister, apiLogin, apiForgotPassword, apiGoogleLogin } from "../../apis/user";
 import Swal from "sweetalert2";
 import { login } from "../../store/user/userSlice";
 import { useDispatch } from "react-redux";
@@ -17,6 +17,7 @@ import gift3 from "../../assets/gift3.png";
 import gift4 from "../../assets/gif4.png";
 import shadow from "../../assets/Shadow.png";
 import balloon from "../../assets/balloons.png";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 const { IoHome, IoEye, IoEyeOff } = icons;
 
@@ -36,6 +37,8 @@ const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [searchParams] = useSearchParams();
+  
 
   const resetPayload = () => {
     setPayLoad({
@@ -122,6 +125,12 @@ const Login = () => {
             text: response.mes || "Registration successful!",
             icon: "success",
             confirmButtonText: "OK",
+            customClass: {
+              title: "custom-title",
+              text: "custom-text",
+              confirmButton: "custom-confirm-button",
+              cancelButton: "custom-cancel-button",
+            },
           }).then(() => {
             setIsSignUp(false);
             resetPayload();
@@ -138,11 +147,13 @@ const Login = () => {
                 userData: rs.userData,
               })
             );
-            navigate(`/${path.HOME}`);
+            searchParams.get("redirect")
+              ? navigate(searchParams.get("redirect"))
+              : navigate(`/${path.HOME}`);
           } else {
             Swal.fire({
-              title: "Oops!",
-              text: rs.mes || "Invalid credentials!",
+              title: "Wrong Password!",
+              text: "Your account will be block after 3 failed attempts.",
               icon: "error",
               confirmButtonText: "OK",
             });
@@ -162,16 +173,60 @@ const Login = () => {
     }
   }, [payload, isSignUp, navigate, dispatch]);
 
+  const handleGoogleLoginSuccess = async (response) => {
+    try {
+      const token = response.credential;
+      const rs = await apiGoogleLogin({ token });
+
+      if (rs.success) {
+        dispatch(
+          login({
+            isLoggedIn: true,
+            token: rs.accessToken,
+            userData: rs.userData,
+          })
+        );
+        searchParams.get("redirect")
+          ? navigate(searchParams.get("redirect"))
+          : navigate(`/${path.HOME}`);
+      } else {
+        Swal.fire({
+          title: "Oops!",
+          text: rs.mes || "Google login failed!",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (error) {
+      console.error("Error during Google login:", error);
+      Swal.fire({
+        title: "Oops!",
+        text: error.message || "An error occurred during Google login.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  const handleGoogleLoginError = () => {
+    Swal.fire({
+      title: "Oops!",
+      text: "Google login failed!",
+      icon: "error",
+      confirmButtonText: "OK",
+    });
+  };
+
   return (
-    <div className="bg-main w-screen h-screen flex">
+    <div className="bg-main w-screen h-screen flex overflow-hidden">
       <Link
         to={`/${path.HOME}`}
         className="absolute text-white p-4 top-8 left-8 bg-[#273526] hover:bg-white hover:text-main rounded-full flex items-center group transition-all ease-in-out duration-300 w-14 hover:w-auto overflow-hidden"
       >
-        <div className="flex items-center justify-center transition-transform duration-600 ease-out group-hover:scale-125 w-14">
+        <div className="flex items-center justify-center transition-transform duration-300 ease-in-out group-hover:scale-125 w-14">
           <IoHome size={25} />
         </div>
-        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-600 ease-in-out whitespace-nowrap">
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out whitespace-nowrap">
           Back to Home
         </span>
       </Link>
@@ -207,11 +262,11 @@ const Login = () => {
       )}
 
       <div className="w-[50%] flex flex-col items-center justify-center mt-[-95px] right-1/2">
-        <div className="font-bold uppercase text-white mb-4 text-center">
+        <div className="font-bold uppercase text-white mb-4 text-center animate-fadeIn">
           <span className="block text-[35px]">Welcome to</span>
           <span className="block text-[80px]">Vieen's Store</span>
         </div>
-        <div className="p-8 flex flex-col items-center bg-white min-w-[450px] rounded-md shadow-2xl">
+        <div className="p-8 flex flex-col items-center bg-white min-w-[450px] rounded-md shadow-2xl animate-slideInUp">
           <h1 className="text-[28px] font-semibold text-main mb-2">
             {isSignUp ? "SIGN UP" : "LOG IN"}
           </h1>
@@ -259,37 +314,49 @@ const Login = () => {
             />
           )}
 
-<div className="w-full relative">
-  <InputField
-    type={passwordVisible ? "text" : "password"}
-    value={payload.password}
-    setValue={(value) => handleChange("password", value)}
-    nameKey="password"
-    placeholder="Password"
-    invalidFields={invalidFields}
-    setInvalidFields={setInvalidFields}
-    fullWidth
-  />
-  <button
-    type="button"
-    className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10 text-main" // Adjust color as needed
-    onClick={() => setPasswordVisible(!passwordVisible)}
-  >
-    {passwordVisible ? (
-      <IoEye size={24} /> // Increased size for visibility
-    ) : (
-      <IoEyeOff size={24} /> // Increased size for visibility
-    )}
-  </button>
-</div>
-
-
+          <div className="w-full relative">
+            <InputField
+              type={passwordVisible ? "text" : "password"}
+              value={payload.password}
+              setValue={(value) => handleChange("password", value)}
+              nameKey="password"
+              placeholder="Password"
+              invalidFields={invalidFields}
+              setInvalidFields={setInvalidFields}
+              fullWidth
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10 text-main" // Adjust color as needed
+              onClick={() => setPasswordVisible(!passwordVisible)}
+            >
+              {passwordVisible ? <IoEye size={24} /> : <IoEyeOff size={24} />}
+            </button>
+          </div>
 
           <Button
             name={isSignUp ? "Sign Up" : "Login"}
             handleOnClick={handleSubmit}
             fw
           />
+          <GoogleOAuthProvider clientId={process.env.REACT_APP_GG_CLIENT_ID}>
+          <div className="w-full text-main bg-[#daecd8] rounded-lg py-1 justify-center flex items-center gap-3 mt-2">
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onError={handleGoogleLoginError}
+              width={400}
+              text="continue_with"
+              locale="en"
+              type="icon"
+              shape="circle"
+              logo_alignment="left"
+              size="medium"
+            /> Continue With Google
+           </div> 
+          </GoogleOAuthProvider>
+
+
+
 
           <div className="w-full text-sm flex items-center justify-between mt-4">
             {!isSignUp ? (
@@ -319,15 +386,15 @@ const Login = () => {
         </div>
       </div>
 
-      <div className="w-[640px] top-[3em] mb-[6em] flex flex-col relative bg-white p-4 rounded-[35px] shadow-2xl left-6">
+      <div className="w-[680px] top-[3em] mb-[6em] flex flex-col relative bg-white p-4 rounded-[35px] shadow-2xl left-6 animate-slideInUp">
         <div className=" flex relative">
           <img
             src={star}
             alt="star"
-            className="object-contain h-[200px] w-[200px] absolute top-[-1em] right-[-20px] animate-spin-slow"
+            className="object-contain opacity-55 h-[200px] w-[200px] absolute top-[-1em] right-[-20px] animate-spin-slow"
           />
 
-          <div className="uppercase flex items-center justify-center gap-4 ml-[20px]">
+          <div className="uppercase flex items-center justify-center gap-4 ml-[20px] animate-slideInLeft">
             <span className="art-word-shadow text-left">
               {isSignUp ? "sign up" : "log in"}
             </span>
@@ -341,36 +408,36 @@ const Login = () => {
           <img
             src={salebag}
             alt="salebag"
-            className="object-contain h-[380px] w-[320px] mb-[-22em] ml-[2.5m] rotate-[-14deg]"
+            className="animate-rotateIn object-contain h-[400px] w-[350px] mb-[-20em]  rotate-[-13deg]"
           />
 
           <img
             src={balloon}
             alt="balloon"
-            className="object-contain h-[230px] w-[200px] absolute left-[-4.75em] top-46 mb-[4.5em] rotate-[-8deg]"
+            className="animate-rotateIn object-contain h-[250px] w-[230px] absolute left-[-4.75em] top-46 mb-[5.5em] rotate-[-8deg]"
           />
 
           <img
             src={shadow}
             alt="shadow"
-            className="object-contain h-[200px] w-[295px] absolute -left-12 -bottom-16"
+            className="animate-rotateIn object-contain h-[200px] w-[295px] absolute -left-12 -bottom-16"
           />
           <img
             src={gift3}
             alt="gift3"
-            className="object-contain h-[250px] w-[250px] absolute -left-20 -bottom-2 rotate-[-20deg]"
+            className="animate-slideInLeft object-contain h-[280px] w-[250px] absolute -left-20 -bottom-2 rotate-[-20deg]"
           />
 
           <img
             src={gift4}
             alt="gift4"
-            className="object-contain h-[200px] w-[200px] absolute left-3 -bottom-6"
+            className="animate-slideInLeft object-contain h-[200px] w-[200px] absolute left-3 -bottom-6"
           />
 
           <img
             src={gc}
             alt="gc"
-            className="object-contain h-[570px] w-[560px] mr-[-15em] mb-[-20px]"
+            className="animate-slideInRight object-contain h-[570px] w-[560px] mr-[-15em] mb-[-20px]"
           />
         </div>
       </div>

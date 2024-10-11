@@ -37,7 +37,7 @@ const MiniBanner = () => {
         {/* TOP GLOBAL BRANDS Banner */}
         <div className="relative w-[50%] bg-[#6b9db1] flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#36688d] hover:via-[#2d82a3] hover:to-[#144d64]">
           <Link
-            to="/sale"
+            to="/products?brand=Cartier"
             className="relative flex items-center justify-center transform transition-transform duration-300 ease-in-out hover:scale-105"
           >
             <span className="relative flex flex-col font-bold text-[26px] text-white gap-0 items-center justify-center p-5 hover:text-[#f18904] z-10">

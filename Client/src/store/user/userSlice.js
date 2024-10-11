@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import * as actions from "./asyncActions";
 
+
 export const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -8,7 +9,7 @@ export const userSlice = createSlice({
     current: null,
     token: null,
     isLoading: false,
-  
+    currentCart: []
   },
   reducers: {
     login: (state, action) => {
@@ -23,7 +24,18 @@ export const userSlice = createSlice({
       state.isLoading = false
      
     },
-    // Định nghĩa thêm các reducers khác nếu cần
+    updateCart: (state, action) => {
+      const {pid, quantity, color} = action.payload
+      const updatingCart = JSON.parse(JSON.stringify(state.currentCart))
+     
+      state.currentCart = updatingCart.map(el =>{
+        if( el.color === color && el.product?._id === pid) {
+          return {...el, quantity}
+        } else return el
+      })
+      
+      
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(actions.getCurrentUser.pending, (state) => {
@@ -34,7 +46,7 @@ export const userSlice = createSlice({
     builder.addCase(actions.getCurrentUser.fulfilled, (state, action) => {
       state.isLoading = false;
       state.current = action.payload;
-     
+      state.currentCart = action.payload.cart
     });
 
     builder.addCase(actions.getCurrentUser.rejected, (state, action) => {
@@ -47,7 +59,7 @@ export const userSlice = createSlice({
 });
 
 // Export actions
-export const { login, logout } = userSlice.actions;
+export const { login, logout, updateCart } = userSlice.actions;
 
 // Export reducer
 export default userSlice.reducer;

@@ -1,10 +1,10 @@
 import { HiPhone, HiShoppingBag } from "react-icons/hi2"
 import { IoMdMail, IoIosArrowForward, IoIosArrowDown } from "react-icons/io"
-import { PiUserCircleFill, PiListHeartBold } from "react-icons/pi";
+import { PiUserCircleFill, PiListHeartBold, PiWarehouseFill } from "react-icons/pi";
 import { ImStarEmpty, ImStarFull, ImStarHalf } from "react-icons/im";
 import { FaArrowRightLong, FaTrashCan } from "react-icons/fa6";
-import { FaChevronUp, FaChevronDown, FaShippingFast, FaMoneyCheck } from "react-icons/fa";
-import { TbShoppingBagPlus, TbShoppingBag, TbLayoutDashboardFilled } from "react-icons/tb";
+import { FaChevronUp, FaChevronDown, FaShippingFast, FaMoneyCheck, FaTruckMonster, FaBlog } from "react-icons/fa";
+import { TbShoppingBagPlus, TbShoppingBag, TbLayoutDashboardFilled, TbPackageImport } from "react-icons/tb";
 import { AiOutlineSound } from "react-icons/ai";
 import { CgChanel } from "react-icons/cg";
 import { BsStars, BsFillPersonFill } from "react-icons/bs";
@@ -19,7 +19,7 @@ import { PiNotepadFill } from "react-icons/pi";
 import { HiFilter } from "react-icons/hi";
 import { IoReturnDownBackOutline, IoEyeOff, IoEye } from "react-icons/io5";
 import { CiEdit } from "react-icons/ci";
-
+import { TfiLayoutListThumbAlt } from "react-icons/tfi";
 
 const icons = {
     HiPhone,
@@ -63,7 +63,11 @@ const icons = {
     IoEyeOff,
     IoEye,
     SiBraintree,
-    SiC
+    SiC,
+    FaTruckMonster,
+    PiWarehouseFill,
+    TbPackageImport,
+    FaBlog
 }
 
 export default icons

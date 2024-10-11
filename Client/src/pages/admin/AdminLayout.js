@@ -11,14 +11,14 @@ const AdminLayout = () => {
   return (
     <div className="flex w-full min-h-screen bg-gray-300 text-white">
       {/* Sidebar Section */}
-      <div className="w-[330px] rounded-[25px] m-6 bg-main fixed top-0 bottom-0">
+      <div className="w-[330px] rounded-[25px] m-6 bg-main fixed top-0 bottom-0 ">
         <AdminSidebar />
       </div>
 
       {/* Content Section */}
       <div className="flex-1 ml-[360px] p-6 overflow-hidden">
         <div className="bg-white text-main rounded-[25px] p-6 h-full">
-          <div className=" bg-[#F5F5FA] shadow-md rounded-[25px] h-[calc(100vh-100px)] overflow-y-auto">
+          <div className=" bg-[#F5F5FA] shadow-md rounded-[25px] h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar">
           
             <Outlet />
           

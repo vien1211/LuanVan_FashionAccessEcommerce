@@ -1,15 +1,17 @@
 const Product = require("../models/product");
+const Order = require("../models/order");
+const Stock = require('../models/stock');
 const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
 const makeSKU = require('uniqid')
 
 const createProduct = asyncHandler(async (req, res) => {
-  const { title, price, description, category, brand, quantity, color } =
+  const { title, price, description, category, brand, color } =
     req.body;
   const images = req.files?.images?.map((el) => el.path);
   if (
-    !(title && price && description && category && brand && quantity && color)
+    !(title && price && description && category && brand && color)
   )
     throw new Error("Mising inputs");
   req.body.slug = slugify(title);
@@ -21,23 +23,69 @@ const createProduct = asyncHandler(async (req, res) => {
   });
 });
 
+// const getProduct = asyncHandler(async (req, res) => {
+//   const { pid } = req.params;
+//   const product = await Product.findById(pid).populate({
+//     path: "ratings",
+//     populate: {
+//       path: "postedBy",
+//       select: "firstname lastname avatar",
+//     },
+//   });
+  
+//   return res.status(200).json({
+//     success: product ? true : false,
+//     productData: product ? product : "Cannot get product",
+//   });
+// });
+
+
+
+
 const getProduct = asyncHandler(async (req, res) => {
-  const { pid } = req.params;
-  const product = await Product.findById(pid).populate({
-    path: "ratings",
-    populate: {
-      path: "postedBy",
-      select: "firstname lastname avatar",
-    },
-  });
-  // if (!product || !product.category) {
-  //   return res.status(404).send("Product not found or category no longer exists.");
-  // }
-  return res.status(200).json({
-    success: product ? true : false,
-    productData: product ? product : "Cannot get product",
-  });
+    const { pid } = req.params;
+
+    // Tìm sản phẩm theo ID
+    const product = await Product.findById(pid).populate({
+        path: "ratings",
+        populate: {
+            path: "postedBy",
+            select: "firstname lastname avatar",
+        },
+    });
+
+    if (!product) {
+        return res.status(404).json({
+            success: false,
+            message: "Product not found",
+        });
+    }
+
+    // Lấy thông tin kho tương ứng với sản phẩm
+    const stockItems = await Stock.find({ product: product._id });
+
+    // Tạo một đối tượng để lưu trữ số lượng
+    const stockInfo = {};
+
+    // Duyệt qua các mục kho và lưu thông tin số lượng
+    stockItems.forEach(item => {
+        stockInfo[item.color] = {
+            quantity: item.quantity,
+            sold: item.sold // Nếu bạn cũng cần số lượng đã bán từ kho
+        };
+    });
+
+    // Gửi phản hồi
+    return res.status(200).json({
+        success: true,
+        productData: {
+            ...product.toObject(),
+            stockInfo // Thêm thông tin kho vào dữ liệu sản phẩm
+        },
+    });
 });
+
+
 
 const getAllProduct = asyncHandler(async (req, res) => {
   try {
@@ -64,6 +112,7 @@ const getAllProduct = asyncHandler(async (req, res) => {
     if (queries?.color) {
       const colorArr = queries.color.split(",");
       const colorQuery = colorArr.map((color) => ({
+       
         color: { $regex: color, $options: "i" },
       }));
       colorQueryObject = { $or: colorQuery };
@@ -91,8 +140,7 @@ const getAllProduct = asyncHandler(async (req, res) => {
     };
 
     // Building the query
-    let queryCommand = Product.find(finalQuery);
-
+    let queryCommand = Product.find(finalQuery)
     // Sorting
     if (req.query.sort) {
       const sortBy = req.query.sort.split(",").join(" ");
@@ -111,7 +159,7 @@ const getAllProduct = asyncHandler(async (req, res) => {
 
     // Pagination
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 10);
     const skip = (page - 1) * limit;
     queryCommand = queryCommand.skip(skip).limit(limit);
 
@@ -119,11 +167,28 @@ const getAllProduct = asyncHandler(async (req, res) => {
     const products = await queryCommand.exec();
     const counts = await Product.countDocuments(finalQuery);
 
+    const productDataWithStock = await Promise.all(products.map(async (product) => {
+      const stockItems = await Stock.find({ product: product._id });
+
+      const stockInfo = {};
+      stockItems.forEach(item => {
+        stockInfo[item.color] = {
+          quantity: item.quantity,
+          sold: item.sold || 0 
+        };
+      });
+
+      return {
+        ...product.toObject(),
+        stockInfo 
+      };
+    }));
     // Response
     return res.status(200).json({
       success: true,
-      productData: products,
+      productData: productDataWithStock,
       counts,
+      
     });
   } catch (error) {
     return res.status(500).json({
@@ -150,6 +215,22 @@ const updateProduct = asyncHandler(async (req, res) => {
 const deleteProduct = asyncHandler(async (req, res) => {
   const { pid } = req.params;
   const deleteProduct = await Product.findByIdAndDelete(pid);
+
+  if (deleteProduct) {
+    // Xóa hoặc cập nhật Stock liên quan đến sản phẩm vừa xóa
+    const stocks = await Stock.find({ product: pid });
+
+    if (stocks && stocks.length > 0) {
+      await Promise.all(
+        stocks.map(async (stock) => {
+          // Xóa Stock thay vì cập nhật số lượng
+          await Stock.findByIdAndDelete(stock._id);
+        })
+      );
+    }
+    
+  }
+
   return res.status(200).json({
     success: deleteProduct ? true : false,
     deleteProduct: deleteProduct ? "deleted" : "Cannot delete product",
@@ -186,6 +267,19 @@ const ratings = asyncHandler(async (req, res) => {
   }
 
   try {
+    const deliveredOrders = await Order.find({
+      user: userId,
+      status: "Success",
+      "products.product": productId,
+    });
+
+    if (!deliveredOrders) {
+      return res.status(403).json({
+        success: false,
+        message: "You need to purchase and receive the product before leaving a review.",
+      });
+    }
+
     const ratingProduct = await Product.findById(productId);
     if (!ratingProduct) {
       return res
@@ -217,7 +311,6 @@ const ratings = asyncHandler(async (req, res) => {
         },
       });
     }
-
     // Calculate average rating
     const updatedProduct = await Product.findById(productId);
     const ratingCount = updatedProduct.ratings.length;
@@ -258,16 +351,16 @@ const uploadimagesProduct = asyncHandler(async (req, res) => {
 
 const addVariant = asyncHandler(async (req, res) => {
   const { pid } = req.params;
-  const { title, price, color, quantity, sold } =
+  const { title, price, color } =
     req.body;
   const images = req.files?.images?.map((el) => el.path);
   if (
-    !(title && price && color && quantity && sold)
+    !(title && price && color)
   )
     throw new Error("Mising inputs");
   const response = await Product.findByIdAndUpdate(
     pid,
-    { $push: { variant: {color, price, title, quantity, sold, images, sku: makeSKU().toUpperCase()} } },
+    { $push: { variant: {color, price, title, quantity: 0, sold: 0, images, sku: makeSKU().toUpperCase()} } },
     { new: true }
   );
   return res.status(200).json({

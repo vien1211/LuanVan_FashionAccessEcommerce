@@ -9,21 +9,20 @@ button.slick-prev {
     z-index: 10;
     width: 40px;
     height: 40px;
-    border-radius: 50%; /* Make the button circular */
+    border-radius: 50%; 
     display: flex;
     justify-content: center;
     align-items: center;
-    border: none; /* Remove default border if any */
-    background-color: transparent; /* Remove any default background */
+    border: none; 
+    background-color: transparent; 
 }
 
-/* Style for the "next" button */
 button.slick-next {
     right: -10px;
 }
 
 button.slick-next::before {
-    content: '\276F'; /* Right arrow */
+    content: '\276F'; 
     color: #45624E;
     background-color: #E4E6D9;
     width: 100%;
@@ -32,16 +31,15 @@ button.slick-next::before {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 50%; /* Circular background */
+    border-radius: 50%; 
 }
 
-/* Style for the "prev" button */
 button.slick-prev {
     left: -10px;
 }
 
 button.slick-prev::before {
-    content: '\276E'; /* Left arrow */
+    content: '\276E'; 
     color: #45624E;
     background-color: #E4E6D9;
     width: 100%;
@@ -50,8 +48,161 @@ button.slick-prev::before {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 50%; /* Circular background */
+    border-radius: 50%; 
 }
+
+
+/* Styles for the vertical slider */
+.vertical-slider button.slick-next,
+.vertical-slider button.slick-prev {
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none; 
+    background-color: transparent; /* Nền trong suốt */
+    opacity: 50%;
+}
+
+.vertical-slider button.slick-next {
+    right: -70px;
+}
+
+.vertical-slider button.slick-next::before {
+    content: '\00BB'; /* Mã ký tự cho mũi tên */
+    color: #fff8dc; /* Màu của mũi tên */
+    font-size: 40px; /* Kích thước mũi tên */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent; /* Nền trong suốt */
+    transform: rotate(90deg);
+}
+
+.vertical-slider button.slick-prev {
+    left: -70px;
+}
+
+.vertical-slider button.slick-prev::before {
+    content: '\00BB'; /* Mã ký tự cho mũi tên */
+    color: #fff8dc; /* Màu của mũi tên */
+    font-size: 40px; /* Kích thước mũi tên */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent; /* Nền trong suốt */
+    transform: rotate(-90deg);
+}
+
+
+.horizontal-slider button.slick-next,
+.horizontal-slider button.slick-prev {
+    z-index: 10;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none; 
+    background-color: transparent; 
+}
+
+
+.horizontal-slider button.slick-next {
+    right: -10px;
+}
+
+.horizontal-slider button.slick-next::before {
+    content: '\276F'; 
+    color: #FFFFFF;
+    background-color: #3B5442;
+    width: 100%;
+    height: 100%;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    transform: rotate(0deg);
+}
+
+.horizontal-slider button.slick-prev {
+    left: -10px;
+}
+
+.horizontal-slider button.slick-prev::before {
+    content: '\276E'; 
+    color: #FFFFFF;
+    background-color: #3B5442;
+    width: 100%;
+    height: 100%;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%; 
+    transform: rotate(0deg);
+}
+
+.vertical-slider .slick-dots li button:before {
+  content: counter(dot);
+  counter-increment: dot; 
+  font-size: 16px; 
+  color: #fff8dc; 
+  opacity: 1;
+  font-family: 'poppins', sans-serif;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+}
+
+.vertical-slider .slick-dots {
+  counter-reset: dot; 
+  position: absolute;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  
+}
+
+.vertical-slider .slick-dots li button {
+  background: transparent; 
+  border: none; 
+}
+
+.vertical-slider .slick-dots li.slick-active button:before {
+  color: #fff8dc; 
+  border-radius: 50%;
+  border: 2px solid #fff8dc;
+  width: 30px;
+  height: 30px;
+  background-color: transparent;
+}
+
+
+
+/* CardProduct.css */
+.card-product-best-sell {
+  border-radius: 0.75rem; 
+  overflow: hidden; 
+  transition: box-shadow 0.3s, transform 0.4s ease; 
+}
+
+.card-product-best-sell:hover {
+  box-shadow: 0 0 20px rgba(134, 199, 55, 0.79);
+  transform: scale(1.05);
+  animation-duration: 0.3s;
+}
+
+
+
 
 @keyframes spin {
     from {
@@ -100,7 +251,7 @@ button.slick-prev::before {
   }
 
   .gradient-text-logo {
-    font-size: 35px;
+    font-size: 28px;
     font-weight: bold;
     text-transform: uppercase;
     background: linear-gradient(to right, #45624E, #82ac90, #416c4f); 
@@ -126,7 +277,7 @@ button.slick-prev::before {
 
   .custom-text {
     font-family: 'poppins', sans-serif; /* Hoặc tên font chữ bạn muốn */
-    font-size: 46px;
+    font-size: 16px;
     color: #333;
   }
   
@@ -172,6 +323,96 @@ button.slick-prev::before {
     margin-bottom: 30px;
   }
 
+/* Custom scrollbar - hide scrollbar for WebKit browsers */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0; /* Hide scrollbar for Chrome, Safari, and Opera */
+}
+
+/* Custom scrollbar for Firefox */
+.custom-scrollbar {
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
+
+/* Remove scrollbar but allow scrolling */
+.custom-scrollbar {
+  -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+  overflow-y: auto; /* Ensure the sidebar is scrollable */
+}
 
   
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px); /* Di chuyển từ trên xuống */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* Về vị trí ban đầu */
+  }
+}
+
+.banner-container {
+  animation: fadeIn 0.8s ease-in-out; /* Áp dụng animation cho banner */
+  opacity: 0; /* Đặt opacity ban đầu để đảm bảo animation hoạt động */
+}
+
+.banner-container.show {
+  opacity: 1; /* Hiển thị banner khi có class show */
+}
+
+
+
+.bubble-effect {
+  position: relative;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.bubble-effect:hover {
+  transform: scale(1.1); /* Scale effect on hover */
+  opacity: 0.8; /* Slightly fade out */
+}
+
+.bubble-effect img {
+  border-radius: 50%;
+  border: 2px solid #7ca07a; /* Border color */
+  background-color: white; /* Background color */
+}
+
+.bubble-effect {
+  width: var(--bubble-size); /* Use CSS variable for size */
+  height: var(--bubble-size);
+}
+
+
+@keyframes bubble {
+  0%, 100% {
+    transform: translateY(5px) scale(1);
+    
+  }
+  50% {
+    transform: translateY(20px) scale(1.05);
+   
+  }
+}
+
+/* Add this to your existing CSS */
+.brands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); /* Adjust minmax as needed */
+  gap: 30px; /* Space between logos */
+  justify-items: center; /* Center the logos */
+  padding: 40px; /* Add padding around the grid */
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+.fade-in.active {
+  opacity: 1;
+  transform: translateY(0);
+}
 

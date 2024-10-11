@@ -38,10 +38,10 @@ var productSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
-    quantity:{
-        type:Number,
-        default: 0
-    },
+    // stock: [{ 
+    //     type: mongoose.Schema.Types.ObjectId, 
+    //     ref: 'Stock' 
+    // }],
     sold:{
         type:Number,
         default: 0
@@ -77,7 +77,8 @@ var productSchema = new mongoose.Schema({
             title: String,
             sku: String
         }
-    ]
+    ],
+    //stock: { type: mongoose.Schema.Types.ObjectId, ref: 'Stock' },
 }, {
     timestamps: true
 });

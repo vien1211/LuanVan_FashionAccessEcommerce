@@ -9,7 +9,9 @@ router.post(
   uploader.fields([{ name: "images", maxCount: 10 }]),
   ctrls.createProduct
 );
+
 router.get("/", ctrls.getAllProduct);
+
 router.put("/ratings", [verifyAccessToken], ctrls.ratings);
 
 router.put(

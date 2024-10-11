@@ -27,3 +27,9 @@ export const apiDeleteCategory = (pcid) => axios({
     url: '/productcategory/' +pcid,
     method: 'delete',
 })
+
+export const apiGetStock = (params) => axios({
+    url: '/stock/',
+    method: 'get',
+    params
+})

@@ -28,6 +28,11 @@ const CreateCategory = () => {
         text: "Please select an image.",
         icon: "error",
         confirmButtonText: "OK",
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+        },
       });
       return;
     }
@@ -44,6 +49,11 @@ const CreateCategory = () => {
         text: "Create Category Successfully!",
         icon: "success",
         confirmButtonText: "OK",
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+        },
       });
       reset();
       setImagePreview(null);
@@ -53,6 +63,11 @@ const CreateCategory = () => {
         text: response.mes || "Failed to Create Category!",
         icon: "error",
         confirmButtonText: "OK",
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+        },
       });
     }
   };

@@ -18,7 +18,7 @@ const DealDaily = () => {
 
   const fetchDealDaily = async () => {
     try {
-      const response = await apiGetProducts({ limit: 1, page: Math.round(Math.random() * 5) });
+      const response = await apiGetProducts({ limit: 1, totalRatings: 5 });
       if (response.success && response.productData.length > 0) {
         const product = response.productData[0];
         
@@ -86,7 +86,7 @@ const DealDaily = () => {
   }, [second, minute, hour, expireTime]);
 
   return (
-    <div className="border w-full">
+    <div className="border border-main border-opacity-40 w-full">
       <div className="flex items-center justify-center mb-4 px-5 py-2 text-white bg-main">
         <span className="flex items-center">
           <ImStarFull className="mr-2 text-yellow-500" />

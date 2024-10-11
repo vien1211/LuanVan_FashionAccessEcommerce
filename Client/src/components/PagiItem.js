@@ -60,7 +60,8 @@ const PagiItem = ({ children }) => {
       className={clsx(
         "w-10 h-10 flex justify-center rounded-full",
         "items-center hover:rounded-full hover:bg-main hover:text-white",
-        +params.get("page") === +children && "rounded-full bg-main text-white"
+        +params.get("page") === +children && "rounded-full bg-main text-white",
+        !+params.get("page") && +children === 1 && "rounded-full bg-main text-white"
       )}
       type="button"
       onClick={handlePagination}

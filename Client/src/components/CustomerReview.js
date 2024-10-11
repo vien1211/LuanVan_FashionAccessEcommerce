@@ -1,23 +1,42 @@
+
 import React, { memo, useState, useEffect, useCallback } from "react";
-import { apiGetProduct, apiRatings } from "../apis";
+import { apiGetOrderByUser, apiGetProduct, apiRatings } from "../apis";
 import { renderStar } from "../ultils/helper";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { ImStarFull } from "react-icons/im";
-import { Button, WriteReview, RenderReview } from "./";
+import { Button, Pagination, WriteReview } from "./";
 import { SlNote } from "react-icons/sl";
 import Swal from "sweetalert2";
 import avt from "../assets/avtDefault.avif";
 import moment from "moment";
+import NoComment from "../assets/NoComment.png";
 
 const CustomerReview = ({ nameProduct }) => {
   const [product, setProduct] = useState(null);
   const { pid } = useParams();
   const [isWrite, setIsWrite] = useState(false);
   const [reviews, setReviews] = useState([]);
-  const { isLoggedIn } = useSelector((state) => state.user);
+  const { current} = useSelector((state) => state.user);
+  const { isLoggedIn} = useSelector((state) => state.user);
+  const [hasPurchased, setHasPurchased] = useState(false);
+  
 
   const handleSubmitReviewOption = async (star, comment) => {
+    if (current?.isBlocked) {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Account Blocked!',
+        text: 'Your account is blocked, and you cannot review at this time.',
+        confirmButtonText: 'OK',
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+          cancelButton: "custom-cancel-button",
+        },
+      });
+    }
     if (!star || !comment) {
       alert("Missing information");
       return;
@@ -39,26 +58,41 @@ const CustomerReview = ({ nameProduct }) => {
           text: "Thank you for your feedback.",
           icon: "success",
           confirmButtonText: "OK",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.reload();
-          }
-        });
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+            cancelButton: "custom-cancel-button",
+          },
+        })
       } else {
-        console.error(
-          "Failed to submit review:",
-          response.message || "Unknown error"
-        );
         alert("Failed to submit review. Please try again.");
       }
     } catch (error) {
-      console.error("Error submitting review:", error);
       alert("Failed to submit review. Please try again.");
     }
   };
 
   // Toggle review form
+ 
+
+ 
+  
   const handleWriteReview = useCallback(() => {
+    if (current?.isBlocked) {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Account Blocked!',
+        text: 'Your account is blocked, and you cannot review at this time.',
+        confirmButtonText: 'OK',
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+          cancelButton: "custom-cancel-button",
+        },
+      });
+    }
     setIsWrite((prev) => !prev);
   }, []);
 
@@ -66,14 +100,32 @@ const CustomerReview = ({ nameProduct }) => {
     const fetchProductData = async () => {
       try {
         const response = await apiGetProduct(pid);
-        if (response.success) setProduct(response.productData);
+        if (response.success){
+           setProduct(response.productData)
+           await checkUserPurchase(response.productData);
+        }
       } catch (error) {
         console.error("Error fetching product data:", error);
       }
     };
 
+    const checkUserPurchase = async (productData) => {
+      try {
+        const ordersResponse = await apiGetOrderByUser(); // Fetch user's orders
+        if (ordersResponse.success) {
+          const deliveredOrders = ordersResponse.orders.filter((order) =>
+            order.products.some((p) => p.product.toString() === productData._id) &&
+           order.status === "Success"
+          );
+          setHasPurchased(deliveredOrders.length > 0); // Check if there are any delivered orders containing the product
+        }
+      } catch (error) {
+        console.error("Error fetching user orders:", error);
+      }
+    };
+
     if (pid) fetchProductData();
-  }, [pid]);
+  }, [pid, reviews]);
 
   // Render rating overview
   const renderRatingOverview = () => {
@@ -131,24 +183,94 @@ const CustomerReview = ({ nameProduct }) => {
     });
   };
 
+  // const renderReviews = () => {
+  //   if (!product || !product.ratings || product.ratings.length === 0) {
+  //     return <img
+  //     src={NoComment}
+  //     className="w-[400px] h-auto mx-auto"
+  //     alt="No comment"
+  //   />; 
+  //   }
+  //   return product?.ratings?.map((review, index) => (
+  //     <div key={index} className="p-4 border-b">
+  //       <div className="flex items-center">
+  //         {/* Avatar */}
+  //         <div className="p-2 flex-none">
+  //           <img
+  //             src={review.postedBy?.avatar || avt} 
+  //             alt="avatar"
+  //             className="w-[60px] h-[60px] object-cover rounded-full"
+  //           />
+  //         </div>
+  //         {/* Name and Date */}
+  //         <div className="flex flex-col flex-auto">
+  //           <div className="flex flex-col ">
+  //             <h3 className="flex font-semibold">{`${review.postedBy?.lastname} ${review.postedBy?.firstname}` || "Anonymous"}</h3>
+  //             <span className="flex text-sm text-gray-500">
+  //               {moment(review.createdAt).fromNow()} {/* Display when the review was posted */}
+  //             </span>
+  //           </div>
+  //         </div>
+  //         {/* Star Rating */}
+  //         <div className="flex flex-col gap-2">
+  //           <span className="flex items-center gap-1 text-main">
+  //             {renderStar(review.star)?.map((el, i) => (
+  //               <span key={i}>{el}</span>
+  //             ))}
+  //           </span>
+  //           <span className="ml-4 text-sm text-gray-500">
+  //             {new Date(review.createdAt).toLocaleDateString()} {/* Display exact date */}
+  //           </span>
+  //         </div>
+  //       </div>
+  //       {/* Comment */}
+  //       <p className="mt-2 text-gray-700">{review.comment}</p>
+  //     </div>
+  //   ));
+  // };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const reviewsPerPage = 5; 
+
+  const indexOfLastReview = currentPage * reviewsPerPage;
+  const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
+  const currentReviews = product?.ratings?.slice(indexOfFirstReview, indexOfLastReview) || [];
+
+  // Calculate total number of pages
+  const totalPages = Math.ceil((product?.ratings?.length || 0) / reviewsPerPage);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   const renderReviews = () => {
-    return product?.ratings?.map((review, index) => (
+    if (!product || !product.ratings || product.ratings.length === 0) {
+      return (
+        <img
+          src={NoComment}
+          className="w-[400px] h-auto mx-auto"
+          alt="No comment"
+        />
+      );
+    }
+
+    return currentReviews.map((review, index) => (
       <div key={index} className="p-4 border-b">
         <div className="flex items-center">
           {/* Avatar */}
           <div className="p-2 flex-none">
             <img
-              src={review.postedBy?.avatar || avt} 
+              src={review.postedBy?.avatar || avt}
               alt="avatar"
               className="w-[60px] h-[60px] object-cover rounded-full"
             />
           </div>
           {/* Name and Date */}
           <div className="flex flex-col flex-auto">
-            <div className="flex flex-col ">
+            <div className="flex flex-col">
               <h3 className="flex font-semibold">{`${review.postedBy?.lastname} ${review.postedBy?.firstname}` || "Anonymous"}</h3>
               <span className="flex text-sm text-gray-500">
-                {moment(review.createdAt).fromNow()} {/* Display when the review was posted */}
+                {moment(review.createdAt).fromNow()}
               </span>
             </div>
           </div>
@@ -160,7 +282,7 @@ const CustomerReview = ({ nameProduct }) => {
               ))}
             </span>
             <span className="ml-4 text-sm text-gray-500">
-              {new Date(review.createdAt).toLocaleDateString()} {/* Display exact date */}
+              {new Date(review.createdAt).toLocaleDateString()}
             </span>
           </div>
         </div>
@@ -169,11 +291,14 @@ const CustomerReview = ({ nameProduct }) => {
       </div>
     ));
   };
+
  
+
+
 
   return (
     <div className="relative flex w-full h-[600px] bg-[#F5F5FA] shadow-md p-4 rounded-lg">
-      {isWrite && isLoggedIn && (
+      {isWrite && isLoggedIn && hasPurchased && (
         <WriteReview
           nameProduct={nameProduct}
           handleSubmitReviewOption={handleSubmitReviewOption}
@@ -184,7 +309,7 @@ const CustomerReview = ({ nameProduct }) => {
         <div className="w-2/5 flex flex-col border-r-2 mr-8">
           {renderRatingOverview()}
           {renderStarRatings()}
-          {isLoggedIn && (
+          {isLoggedIn && hasPurchased && (
             <div className="w-full flex">
               <Button
                 handleOnClick={handleWriteReview}
@@ -196,8 +321,14 @@ const CustomerReview = ({ nameProduct }) => {
           )}
         </div>
         <div className="w-3/5 flex flex-col gap-4">
-        {renderReviews()}
-        
+          {renderReviews()}
+          <div className="flex justify-end my-4">
+        <Pagination
+          totalCount={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
+      </div>
         </div>
       </div>
     </div>

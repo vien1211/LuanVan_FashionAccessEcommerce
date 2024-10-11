@@ -1,15 +1,41 @@
 import React, { useState } from "react";
-import { Button } from "../../components";
-import {useParams} from "react-router-dom";
+import { Button, Loading } from "../../components";
+import {createSearchParams, useLocation, useNavigate, useParams} from "react-router-dom";
 import { apiResetPassword } from "../../apis/user";
+import { showModal } from "../../store/app/appSlice";
+import { useDispatch } from "react-redux";
+import Swal from "sweetalert2";
+import path from "../../ultils/path";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const {token} = useParams()
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleResetPassWord = async() => {
+    dispatch(
+      showModal({ isShowModal: true, modalChildren: <Loading /> })
+    );
     const response = await apiResetPassword({password, token})
+    dispatch(showModal({ isShowModal: false, modalChildren: null }));
     console.log(response)
+    Swal.fire({
+      title: "Congratulations!",
+      text: response.mes || "Reset Your Password successful!",
+      icon: "success",
+      confirmButtonText: "OK",
+      customClass: {
+        title: "custom-title",
+        text: "custom-text",
+        confirmButton: "custom-confirm-button",
+        cancelButton: "custom-cancel-button",
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {navigate(
+        `/${path.LOGIN}`)}
+    })
   };
 
   return (

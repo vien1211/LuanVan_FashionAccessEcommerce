@@ -8,6 +8,8 @@ const jwt = require("jsonwebtoken");
 const sendMail = require("../ultils/sendMail");
 const crypto = require("crypto");
 const makeToken = require("uniqid");
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GG_CLIENT_ID, process.env.GG_CLIENT_SECRET);
 
 // const register = asyncHandler(async(req, res) => {
 //     const { email, password, firstname, lastname } = req.body;
@@ -149,6 +151,39 @@ const verifyregister = asyncHandler(async (req, res) => {
   else return res.redirect(`${process.env.CLIENT_URL}/verifyregister/failed`);
 });
 
+// const login = asyncHandler(async (req, res) => {
+//   const { email, password } = req.body;
+//   if (!email || !password)
+//     return res.status(400).json({
+//       success: false,
+//       mes: "Missing inputs",
+//     });
+
+//   const response = await User.findOne({ email });
+//   if (response && (await response.isCorrectPassword(password))) {
+//     const { password, role, refreshToken, ...userData } = response.toObject();
+//     const accessToken = generateAccessToken(response._id, role);
+//     const newRefreshToken = generateRefreshToken(response._id);
+//     await User.findByIdAndUpdate(
+//       response._id,
+//       { refreshToken: newRefreshToken },
+//       { new: true }
+//     );
+//     //Lưu RefreshToken vào cookie
+//     res.cookie("refreshToken", newRefreshToken, {
+//       httpOnly: true,
+//       maxAge: 7 * 24 * 60 * 1000,
+//     });
+//     return res.status(200).json({
+//       success: true,
+//       accessToken,
+//       userData,
+//     });
+//   } else {
+//     throw new Error("Invalid credentials!");
+//   }
+// });
+
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
@@ -157,39 +192,89 @@ const login = asyncHandler(async (req, res) => {
       mes: "Missing inputs",
     });
 
-  const response = await User.findOne({ email });
-  if (response && (await response.isCorrectPassword(password))) {
-    const { password, role, refreshToken, ...userData } = response.toObject();
-    const accessToken = generateAccessToken(response._id, role);
-    const newRefreshToken = generateRefreshToken(response._id);
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      mes: "User not found!",
+    });
+  }
+
+  // Kiểm tra xem tài khoản có bị chặn hay không
+  if (user.isBlocked) {
+    return res.status(403).json({
+      success: false,
+      mes: "Your account has been blocked due to multiple failed login attempts. Please contact support.",
+    });
+  }
+
+  if (await user.isCorrectPassword(password)) {
+    // Đăng nhập thành công, reset lại số lần đăng nhập thất bại
+    user.loginAttempts = 0;
+    await user.save();
+
+    const { password, role, refreshToken, ...userData } = user.toObject();
+    const accessToken = generateAccessToken(user._id, role);
+    const newRefreshToken = generateRefreshToken(user._id);
+    
+    // Cập nhật refreshToken trong cơ sở dữ liệu
     await User.findByIdAndUpdate(
-      response._id,
+      user._id,
       { refreshToken: newRefreshToken },
       { new: true }
     );
-    //Lưu RefreshToken vào cookie
+
+    // Lưu refreshToken vào cookie
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 1000, // 7 ngày
     });
+
     return res.status(200).json({
       success: true,
       accessToken,
       userData,
     });
   } else {
-    throw new Error("Invalid credentials!");
+    // Nếu mật khẩu không chính xác
+    user.loginAttempts += 1;
+
+    if (user.loginAttempts >= 3) {
+      user.isBlocked = true; // Chặn tài khoản sau 3 lần thất bại
+    }
+
+    await user.save(); // Lưu trạng thái số lần đăng nhập thất bại và chặn
+
+    return res.status(401).json({
+      success: false,
+      mes: user.isBlocked
+        ? "Your account has been blocked after 3 failed attempts."
+        : "Wrong Password!",
+    });
   }
 });
 
+
 const getCurrent = asyncHandler(async (req, res) => {
   const { _id } = req.user;
-  const user = await User.findById(_id).select("-refreshToken -password");
-  
+  const user = await User.findById(_id)
+    .select("-refreshToken -password")
+    .populate({
+      path: "cart",
+      populate: {
+        path: "product",
+        select: "title images price ",
+      },
+    })
+    .populate("wishlist", "title images price color sold")
+    .populate('likes', "title") 
+    .populate('dislikes', "title");
+
   if (user) {
     return res.status(200).json({
       success: true,
-      rs: user, 
+      rs: user,
     });
   } else {
     return res.status(404).json({
@@ -198,7 +283,6 @@ const getCurrent = asyncHandler(async (req, res) => {
     });
   }
 });
-
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const cookie = req.cookies;
@@ -285,44 +369,47 @@ const resetPassword = asyncHandler(async (req, res) => {
 const getUsers = asyncHandler(async (req, res) => {
   try {
     const queries = { ...req.query };
-    const excludeFields = ['limit', 'sort', 'page', 'fields'];
-    excludeFields.forEach(el => delete queries[el]);
-    
+    const excludeFields = ["limit", "sort", "page", "fields"];
+    excludeFields.forEach((el) => delete queries[el]);
+
     let queryString = JSON.stringify(queries);
-    queryString = queryString.replace(/\b(gte|gt|lt|lte)\b/g, match => `$${match}`);
+    queryString = queryString.replace(
+      /\b(gte|gt|lt|lte)\b/g,
+      (match) => `$${match}`
+    );
     const formattedQueries = JSON.parse(queryString);
-    
+
     // Filtering
-    if (queries?.name) formattedQueries.name = { $regex: queries.name, $options: 'i' };
-    
-    
-    if(req.query.q){
-      delete formattedQueries.q
-      formattedQueries['$or'] = [
-        {firstname : { $regex: req.query.q, $options: 'i' }},
-        {lastname : { $regex: req.query.q, $options: 'i' }},
-        {email : { $regex: req.query.q, $options: 'i' }},
-        {mobile : { $regex: req.query.q, $options: 'i' }}
-      ]
+    if (queries?.name)
+      formattedQueries.name = { $regex: queries.name, $options: "i" };
+
+    if (req.query.q) {
+      delete formattedQueries.q;
+      formattedQueries["$or"] = [
+        { firstname: { $regex: req.query.q, $options: "i" } },
+        { lastname: { $regex: req.query.q, $options: "i" } },
+        { email: { $regex: req.query.q, $options: "i" } },
+        { mobile: { $regex: req.query.q, $options: "i" } },
+      ];
     }
-    console.log(formattedQueries)
+    console.log(formattedQueries);
 
     let queryCommand = User.find(formattedQueries);
-    
+
     // Sorting
     if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
+      const sortBy = req.query.sort.split(",").join(" ");
       queryCommand = queryCommand.sort(sortBy);
     } else {
-      queryCommand = queryCommand.sort('-createdAt');
+      queryCommand = queryCommand.sort("-createdAt");
     }
 
     // Field limiting
     if (req.query.fields) {
-      const fields = req.query.fields.split(',').join(' ');
+      const fields = req.query.fields.split(",").join(" ");
       queryCommand = queryCommand.select(fields);
     } else {
-      queryCommand = queryCommand.select('-__v');
+      queryCommand = queryCommand.select("-__v");
     }
 
     // Pagination
@@ -347,7 +434,6 @@ const getUsers = asyncHandler(async (req, res) => {
   }
 });
 
-
 const deleteUser = asyncHandler(async (req, res) => {
   const { uid } = req.params;
   const response = await User.findByIdAndDelete(uid);
@@ -361,9 +447,9 @@ const deleteUser = asyncHandler(async (req, res) => {
 
 const updateUser = asyncHandler(async (req, res) => {
   const { _id } = req.user;
-  const {firstname, lastname, email, mobile} = req.body
-  const data ={firstname, lastname, email, mobile}
-  if (req.file) data.avatar = req.file.path
+  const { firstname, lastname, email, mobile, address } = req.body;
+  const data = { firstname, lastname, email, mobile, address };
+  if (req.file) data.avatar = req.file.path;
   if (!_id || Object.keys(req.body).length === 0)
     throw new Error("Missing inputs");
   const response = await User.findByIdAndUpdate(_id, data, {
@@ -383,7 +469,7 @@ const updateUserByAdmin = asyncHandler(async (req, res) => {
   }).select("-password -role");
   return res.status(200).json({
     success: response ? true : false,
-    mes: response ? 'Updated' : "Something went wrong",
+    mes: response ? "Updated" : "Something went wrong",
   });
 });
 
@@ -403,81 +489,190 @@ const updateUserAddress = asyncHandler(async (req, res) => {
 
 const updateCart = asyncHandler(async (req, res) => {
   const { _id } = req.user;
-  const { pid, quantity, color } = req.body;
-  if (!pid || !quantity || !color) throw new Error("Missing inputs");
+  const { pid, quantity = 1, color, price, image, title } = req.body;
+  if (!pid || !color) throw new Error("Missing inputs");
   const user = await User.findById(_id).select("cart");
   const alreadyProduct = user?.cart?.find(
-    (el) => el.product.toString() === pid
+    (el) => el.product.toString() === pid && el.color === color
   );
   if (alreadyProduct) {
     if (alreadyProduct.color === color) {
       const response = await User.updateOne(
         { cart: { $elemMatch: alreadyProduct } },
-        { $set: { "cart.$.quantity": quantity } },
+        {
+          $set: {
+            "cart.$.quantity": quantity,
+            "cart.$.price": price,
+            "cart.$.image": image,
+            "cart.$.title": title,
+          },
+        },
         { new: true }
       );
       return res.status(200).json({
         success: response ? true : false,
-        updatedUser: response ? response : "Something went wrong",
-      });
-    } else {
-      const response = await User.findByIdAndUpdate(
-        _id,
-        { $push: { cart: { product: pid, quantity, color } } },
-        { new: true }
-      );
-      return res.status(200).json({
-        success: response ? true : false,
-        updatedUser: response ? response : "Something went wrong",
+        mes: response ? "Updated your cart" : "Something went wrong",
       });
     }
   } else {
     const response = await User.findByIdAndUpdate(
       _id,
-      { $push: { cart: { product: pid, quantity, color } } },
+      {
+        $push: { cart: { product: pid, quantity, color, price, image, title } },
+      },
       { new: true }
     );
     return res.status(200).json({
       success: response ? true : false,
-      updatedUser: response ? response : "Something went wrong",
+      mes: response ? "Updated your cart" : "Something went wrong",
     });
   }
 });
 
-// const updateCart = asyncHandler(async(req, res) => {
-//     const { _id } = req.user;
-//     const { pid, quantity, color } = req.body;
+const removeProductInCart = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { pid, color } = req.params;
 
-//     if (!pid || !quantity || !color) throw new Error('Missing inputs');
+  // Find the user and check if the product exists in the cart
+  const user = await User.findById(_id).select("cart");
+  const alreadyProduct = user?.cart?.find(
+    (el) => el.product.toString() === pid && el.color === color
+  );
 
-//     const user = await User.findById(_id).select('cart');
+  // If the product doesn't exist in the cart, return an error message
+  if (!alreadyProduct) {
+    return res.status(404).json({
+      success: false,
+      mes: "Product not found in your cart",
+    });
+  }
 
-//     if (!user) {
-//         return res.status(404).json({
-//             success: false,
-//             message: 'User not found'
-//         });
-//     }
+  // Remove the product from the cart
+  const response = await User.findByIdAndUpdate(
+    _id,
+    { $pull: { cart: { product: pid, color } } },
+    { new: true }
+  );
 
-//     const alreadyProduct = user.cart.find(el => el.product.toString() === pid);
+  return res.status(200).json({
+    success: response ? true : false,
+    mes: response ? "Removed product from your cart" : "Something went wrong",
+    cart: response.cart,
+  });
+});
 
-//     if (alreadyProduct) {
-//         // Update the quantity and/or color of the existing product in the cart
-//         alreadyProduct.quantity = quantity;
-//         alreadyProduct.color = color;
-//     } else {
-//         // Add the new product to the cart
-//         user.cart.push({ product: pid, quantity, color });
-//     }
+const updateWishList = asyncHandler(async (req, res) => {
+  const { pid } = req.params;
+  const { _id } = req.user;
+  const user = await User.findById(_id);
+  const alreadyWishList = user.wishlist?.find((el) => el.toString() === pid);
+  if (alreadyWishList) {
+    const response = await User.findByIdAndUpdate(
+      _id,
+      { $pull: { wishlist: pid } },
+      { new: true }
+    );
+    return res.json({
+      success: response ? true : false,
+      mes: response ? "Updated your Wishlist" : "Fail to update Wishlist",
+    });
+  } else {
+    const response = await User.findByIdAndUpdate(
+      _id,
+      { $push: { wishlist: pid } },
+      { new: true }
+    );
+    return res.json({
+      success: response ? true : false,
+      mes: response ? "Updated your Wishlist" : "Fail to update Wishlist",
+    });
+  }
+});
 
-//     // Save the updated user document
-//     const updatedUser = await user.save();
 
-//     return res.status(200).json({
-//         success: true,
-//         updatedUser: updatedUser.cart
-//     });
-// });
+const getUsersToday = asyncHandler(async (req, res) => {
+  const today = new Date();
+  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+  const usersToday = await User.find({
+    createdAt: { $gte: startOfDay, $lt: endOfDay },
+  });
+
+  return res.json({
+    success: true,
+    users: usersToday,
+    counts: usersToday.length,
+  });
+});
+
+
+const googleLogin = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({
+      success: false,
+      mes: "Missing token",
+    });
+  }
+
+  try {
+    // Xác thực token với Google
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GG_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name } = payload;
+
+    // Kiểm tra người dùng có tồn tại trong database không
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Nếu người dùng không tồn tại, tạo một người dùng mới
+      user = await User.create({
+        email,
+        name,
+        password: "",    // Vì đăng nhập bằng Google, không cần mật khẩu
+      });
+    }
+
+    const { password, role, refreshToken, ...userData } = user.toObject();
+
+    // Tạo access token và refresh token
+    const accessToken = generateAccessToken(user._id, role);
+    const newRefreshToken = generateRefreshToken(user._id);
+
+    // Lưu refreshToken vào database
+    await User.findByIdAndUpdate(
+      user._id,
+      { refreshToken: newRefreshToken },
+      { new: true }
+    );
+
+    // Lưu refreshToken vào cookie
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+    });
+
+    // Trả về accessToken và dữ liệu người dùng
+    return res.status(200).json({
+      success: true,
+      accessToken,
+      userData,
+    });
+  } catch (error) {
+    console.error("Google login error:", error);
+    return res.status(500).json({
+      success: false,
+      mes: "Google login failed",
+    });
+  }
+});
+
 
 module.exports = {
   register,
@@ -494,4 +689,8 @@ module.exports = {
   updateUserAddress,
   updateCart,
   verifyregister,
+  removeProductInCart,
+  updateWishList,
+  getUsersToday,
+  googleLogin
 };

@@ -11,6 +11,8 @@ import {
 } from 'redux-persist';
 import appSlice from './app/appSlice';
 import brandSlice from './brand/brandSlice';
+import supplierSlice from './supplier/supplierSlice';
+import blogCateSlice from './blogcategory/blogCateSlice';
 import productSlice from './products/productSlice';
 import storage from 'redux-persist/lib/storage';
 
@@ -24,7 +26,7 @@ const commonConfig = {
 
 const userConfig = {
   ...commonConfig,
-  whitelist: ['isLoggedIn', 'token', 'current'], 
+  whitelist: ['isLoggedIn', 'token', 'current', 'currentCart'], 
 };
 
 const persistedUserReducer = persistReducer(userConfig, userSlice);
@@ -34,7 +36,9 @@ export const store = configureStore({
     app: appSlice,
     product: productSlice,
     user: persistedUserReducer, 
-    brand: brandSlice
+    brand: brandSlice,
+    supplier: supplierSlice,
+    blogcategory: blogCateSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -34,7 +34,7 @@ const CustomVariant = ({ customVariant, setCustomVariant }) => {
       title: customVariant?.title,
       color: customVariant?.color,
       price: customVariant?.price,
-      quantity: customVariant?.quantity,
+      quantity: 0,
       sold: 0,
     });
   }, [customVariant]);
@@ -135,7 +135,7 @@ const CustomVariant = ({ customVariant, setCustomVariant }) => {
         title: data.title,
         color: data.color,
         price: data.price,
-        quantity: data.quantity,
+        quantity: 0,
         sold: 0, // Default sold for the new variant
       };
   
@@ -220,9 +220,11 @@ const CustomVariant = ({ customVariant, setCustomVariant }) => {
               label="Variant Quantity"
               register={register}
               errors={errors}
+              value={0}
               id="quantity"
               fullWidth
-              style="flex-auto border-main rounded-md"
+              readOnly={true}
+              style="flex-auto border-main rounded-md opacity-70"
             />
           </div>
 
