@@ -31,91 +31,89 @@ const CardProduct = ({ productData, pid, className }) => {
   const handleSelectOption = async (e, flag) => {
     e.stopPropagation();
     if (flag === "CART") {
-     
-        if (!current)
-          return Swal.fire({
-            title: "Almost...",
-            text: "Please Log In To Do This Action",
-            icon: "info",
-            confirmButtonText: "Go Log In",
-            showCancelButton: true,
-            cancelButtonText: "Not now!",
-            customClass: {
-              title: "custom-title",
-              text: "custom-text",
-              confirmButton: "custom-confirm-button",
-              cancelButton: "custom-cancel-button",
-            },
-          }).then((rs) => {
-            if (rs.isConfirmed)
-              navigate({
-                pathname: `/${path.LOGIN}`,
-                search: createSearchParams({
-                  redirect: location.pathname,
-                }).toString(),
-              });
-          });
+      if (!current)
+        return Swal.fire({
+          title: "Almost...",
+          text: "Please Log In To Do This Action",
+          icon: "info",
+          confirmButtonText: "Go Log In",
+          showCancelButton: true,
+          cancelButtonText: "Not now!",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+            cancelButton: "custom-cancel-button",
+          },
+        }).then((rs) => {
+          if (rs.isConfirmed)
+            navigate({
+              pathname: `/${path.LOGIN}`,
+              search: createSearchParams({
+                redirect: location.pathname,
+              }).toString(),
+            });
+        });
 
       //     const availableStock = product?.stockInfo?.[curentProduct?.color]?.quantity ||
       // product?.stockInfo?.[product?.color]?.quantity ||
       // // curentProduct?.quantity ||
       // // product?.quantity ||
       // 0;
-      const availableStock = productData?.stockInfo?.[productData?.color]?.quantity || 0;
+      const availableStock =
+        productData?.stockInfo?.[productData?.color]?.quantity || 0;
 
-          if (availableStock <= 0) {
-            return Swal.fire({
-              title: "Out of Stock",
-              text: "This product is currently out of stock and cannot be added to the cart.",
-              icon: "info",
-              confirmButtonText: "OK",
-              customClass: {
-                title: "custom-title",
-                text: "custom-text",
-                confirmButton: "custom-confirm-button",
-              },
-            });
-          }
-    
-        const response = await apiUpdateCart({
-          pid: productData?._id,
-          color: productData?.color,
-          stockInfo: 1,
-          price: productData?.price,
-          image: productData?.images[0],
-          title: productData?.title,
+      if (availableStock <= 0) {
+        return Swal.fire({
+          title: "Out of Stock",
+          text: "This product is currently out of stock and cannot be added to the cart.",
+          icon: "info",
+          confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+          },
         });
-        
+      }
 
-        if (response.success) {
-          Swal.fire({
-            title: "Updated",
-            text: "Update Cart Successfully!",
-            icon: "success",
-            confirmButtonText: "OK",
-            customClass: {
-              title: "custom-title",
-              text: "custom-text",
-              confirmButton: "custom-confirm-button",
-              cancelButton: "custom-cancel-button",
-            },
-          });
-          dispatch(getCurrentUser());
-        } else {
-          Swal.fire({
-            title: "Oops!",
-            text: "Failed to Update Cart!",
-            icon: "error",
-            confirmButtonText: "OK",
-            customClass: {
-              title: "custom-title",
-              text: "custom-text",
-              confirmButton: "custom-confirm-button",
-              cancelButton: "custom-cancel-button",
-            },
-          });
-        }
-      
+      const response = await apiUpdateCart({
+        pid: productData?._id,
+        color: productData?.color,
+        stockInfo: 1,
+        price: productData?.price,
+        image: productData?.images[0],
+        title: productData?.title,
+      });
+
+      if (response.success) {
+        Swal.fire({
+          title: "Updated",
+          text: "Update Cart Successfully!",
+          icon: "success",
+          confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+            cancelButton: "custom-cancel-button",
+          },
+        });
+        dispatch(getCurrentUser());
+      } else {
+        Swal.fire({
+          title: "Oops!",
+          text: "Failed to Update Cart!",
+          icon: "error",
+          confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+            cancelButton: "custom-cancel-button",
+          },
+        });
+      }
     }
 
     if (flag === "WISHLIST") {
@@ -142,21 +140,32 @@ const CardProduct = ({ productData, pid, className }) => {
               }).toString(),
             });
         });
-      const response = await apiUpdateWishlist(pid)
-      if(response.success){
-        dispatch(getCurrentUser())
-        Swal.fire({title: "Updated!", text: "Updated Your Wishlist!", icon: "success", customClass: {
-          title: "custom-title",
-          text: "custom-text",
-          confirmButton: "custom-confirm-button",
-          cancelButton: "custom-cancel-button",
-        },})
-      } else Swal.fire({title: "Oops!", text: "Fail To Add Wishlist!", icon: "error", customClass: {
-        title: "custom-title",
-        text: "custom-text",
-        confirmButton: "custom-confirm-button",
-        cancelButton: "custom-cancel-button",
-      },})
+      const response = await apiUpdateWishlist(pid);
+      if (response.success) {
+        dispatch(getCurrentUser());
+        Swal.fire({
+          title: "Updated!",
+          text: "Updated Your Wishlist!",
+          icon: "success",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+            cancelButton: "custom-cancel-button",
+          },
+        });
+      } else
+        Swal.fire({
+          title: "Oops!",
+          text: "Fail To Add Wishlist!",
+          icon: "error",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+            cancelButton: "custom-cancel-button",
+          },
+        });
     }
 
     if (flag === "QUICK_VIEW") {
@@ -177,20 +186,21 @@ const CardProduct = ({ productData, pid, className }) => {
   const handleNavigate = () => {
     if (productData?.category && productData?._id && productData?.title) {
       navigate(
-        `/${productData?.category?.toLowerCase()}/${productData?._id}/${productData?.title}`
+        `/${productData?.category?.toLowerCase()}/${productData?._id}/${
+          productData?.title
+        }`
       );
     } else {
-      console.error('Category or product data is missing');
+      console.error("Category or product data is missing");
     }
   };
 
   return (
     <div
       onClick={handleNavigate}
-      className="relative w-full border transform transition-transform duration-300 hover:border-[#a8f5bf]"
-      
+      className="relative w-full border border-main border-opacity-40 rounded-[20px] transform transition-transform duration-300 hover:border-[#a8f5bf]"
     >
-      <div className="relative w-full p-[12px] flex flex-col items-center bg-white">
+      <div className="relative rounded-[20px] w-full p-[12px] flex flex-col items-center bg-white">
         <div className={"relative w-full ${className}"}>
           <img
             src={
@@ -198,7 +208,7 @@ const CardProduct = ({ productData, pid, className }) => {
               "https://www.proclinic-products.com/build/static/default-product.30484205.png"
             }
             alt={productData?.title || "Product Image"}
-            className="w-[270px] h-[270px] object-cover"
+            className="w-[270px] h-[270px] object-cover rounded-[15px]"
           />
           {/* Icons Container */}
           <div className="absolute px-14 py-2 bottom-4 flex gap-2 opacity-0 hover:opacity-100 transition-opacity duration-300">
@@ -214,7 +224,7 @@ const CardProduct = ({ productData, pid, className }) => {
                 />
               </div>
             </div>
-            
+
             <div
               title="Add to Wishlist"
               onClick={(e) => handleSelectOption(e, "WISHLIST")}
@@ -223,7 +233,11 @@ const CardProduct = ({ productData, pid, className }) => {
               <div className="bg-[#273526] text-white w-[40px] h-[40px] flex items-center justify-center rounded-full transition-colors duration-300 border-[#273526] border-2 ease-out hover:bg-white hover:text-[#6D8777] hover:border-[#6D8777]">
                 <GoHeartFill
                   size={18}
-                  color={ current?.wishlist?.some((i) => i._id === pid) ? "#FC3C44" : "gray"}
+                  color={
+                    current?.wishlist?.some((i) => i._id === pid)
+                      ? "#FC3C44"
+                      : "gray"
+                  }
                   className="transition-transform duration-500 ease-in-out hover:scale-125"
                 />
               </div>
@@ -263,10 +277,16 @@ const CardProduct = ({ productData, pid, className }) => {
             <span className="text-main text-[#273526] flex items-center gap-1">
               {renderStar(productData?.totalRatings)}
             </span>
-            <span className="text-[20px] text-[#d66363]">{`${formatMoney(
+            {/* <span className="text-[20px] text-[#d66363]">{`${formatMoney(
               productData?.price
-            )} VNĐ`}</span>
-            <span className="text-main">Đã bán {productData?.sold}</span>
+            )} VNĐ`}</span> */}
+            <span className="text-[20px] text-[#d66363]">
+              {productData.price
+                ? `${formatMoney(productData.price)} VNĐ`
+                : "Not Available"}
+            </span>
+
+            <span className="text-main">{productData?.sold} Sold</span>
           </div>
         </div>
       </div>
@@ -275,5 +295,3 @@ const CardProduct = ({ productData, pid, className }) => {
 };
 
 export default CardProduct;
-
-  

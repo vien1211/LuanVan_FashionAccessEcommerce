@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="w-main flex">
           {/* About Us Section */}
           <div className="flex-2 flex flex-col gap-2 mr-[80px]">
-            <h3 className="mb-[20px] font-medium text-[20px] pl-[15px] border-l-4 border-[#273526]">
+            <h3 className="mb-[20px] font-medium text-[20px] pl-[15px] border-l-4 border-[#D3D7BC]">
               CONTACT US
             </h3>
             <div className='flex gap-2'>
@@ -37,7 +37,7 @@ const Footer = () => {
 
           {/* Information Section */}
           <div className="flex-1 flex flex-col gap-2">
-            <h3 className="mb-[20px] font-medium text-[20px] pl-[15px] border-l-4 border-[#273526]">
+            <h3 className="mb-[20px] font-medium text-[20px] pl-[15px] border-l-4 border-[#D3D7BC]">
               INFORMATION
             </h3>
             <span>About Us</span>
@@ -49,7 +49,7 @@ const Footer = () => {
 
           {/* Placeholder Sections */}
           <div className="flex-1 flex flex-col gap-2">
-            <h3 className="mb-[20px] font-medium text-[20px] pl-[15px] border-l-4 border-[#273526]">
+            <h3 className="mb-[20px] font-medium text-[20px] pl-[15px] border-l-4 border-[#D3D7BC]">
               QUICK LINKS
             </h3>
             <span>Shop Now</span>
@@ -60,7 +60,7 @@ const Footer = () => {
           </div>
 
           <div className="flex-1 flex flex-col gap-2">
-            <h3 className="mb-[20px] font-medium text-[20px] pl-[15px] border-l-4 border-[#273526]">
+            <h3 className="mb-[20px] font-medium text-[20px] pl-[15px] border-l-4 border-[#D3D7BC]">
               INFORMATION
             </h3>
             <span>Link 1</span>

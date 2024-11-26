@@ -6,10 +6,17 @@ const {
 } = require("../middlewares/jwt");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../ultils/sendMail");
+const bcrypt = require('bcrypt');
 const crypto = require("crypto");
 const makeToken = require("uniqid");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GG_CLIENT_ID, process.env.GG_CLIENT_SECRET);
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+ 
+const twilio = require("twilio")
+const clientPN = require('twilio')(accountSid, authToken);
 
 // const register = asyncHandler(async(req, res) => {
 //     const { email, password, firstname, lastname } = req.body;
@@ -35,16 +42,36 @@ const client = new OAuth2Client(process.env.GG_CLIENT_ID, process.env.GG_CLIENT_
 //         });
 //     }
 // });
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const register = asyncHandler(async (req, res) => {
-  const { email, password, firstname, lastname, mobile } = req.body;
+  const { email, password, confirmPassword, firstname, lastname, mobile } = req.body;
 
   // Check for missing inputs
-  if (!email || !password || !firstname || !lastname || !mobile) {
+  if (!email || !password || !confirmPassword || !firstname || !lastname || !mobile) {
     return res.status(400).json({
       success: false,
       mes: "Missing inputs",
     });
+  }
+
+  // if (!passwordRegex.test(password)) {
+  //   return res.status(400).json({
+  //     success: false,
+  //     mes: "Password must be at least 6 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+  //   });
+  // }
+
+  if (password !== confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      mes: "Passwords do not match",
+    });
+  }
+  
+  if (!mobile.startsWith("+84")) {
+    mobile = `+84${mobile.slice(1)}`;
   }
 
   const user = await User.findOne({ email });
@@ -191,6 +218,13 @@ const login = asyncHandler(async (req, res) => {
       success: false,
       mes: "Missing inputs",
     });
+  
+    // if (!passwordRegex.test(password)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     mes: "Password must be at least 6 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+    //   });
+    // }
 
   const user = await User.findOne({ email });
 
@@ -464,6 +498,9 @@ const updateUser = asyncHandler(async (req, res) => {
 const updateUserByAdmin = asyncHandler(async (req, res) => {
   const { uid } = req.params;
   if (Object.keys(req.body).length === 0) throw new Error("Missing inputs");
+  if (req.body.mobile && !req.body.mobile.startsWith("+84")) {
+    req.body.mobile = `+84${req.body.mobile.slice(1)}`;
+  }
   const response = await User.findByIdAndUpdate(uid, req.body, {
     new: true,
   }).select("-password -role");
@@ -474,18 +511,22 @@ const updateUserByAdmin = asyncHandler(async (req, res) => {
 });
 
 const updateUserAddress = asyncHandler(async (req, res) => {
-  const { _id } = req.user;
+  const { _id } = req.user; // Lấy ID của người dùng từ token
   if (Object.keys(req.body).length === 0) throw new Error("Missing inputs");
+
+  // Giả sử req.body là một đối tượng địa chỉ, có thể điều chỉnh nếu cần
   const response = await User.findByIdAndUpdate(
     _id,
-    { $push: { address: req.body } },
+    { $push: { address: req.body } }, // Thêm địa chỉ vào mảng địa chỉ
     { new: true }
-  ).select("-password -role");
+  ).select("-password -role"); // Không trả về password và role
+
   return res.status(200).json({
     success: response ? true : false,
     updatedUser: response ? response : "Something went wrong",
   });
 });
+
 
 const updateCart = asyncHandler(async (req, res) => {
   const { _id } = req.user;
@@ -607,6 +648,71 @@ const getUsersToday = asyncHandler(async (req, res) => {
 });
 
 
+// const googleLogin = asyncHandler(async (req, res) => {
+//   const { token } = req.body;
+
+//   if (!token) {
+//     return res.status(400).json({
+//       success: false,
+//       mes: "Missing token",
+//     });
+//   }
+
+//   try {
+//     // Xác thực token với Google
+//     const ticket = await client.verifyIdToken({
+//       idToken: token,
+//       audience: process.env.GG_CLIENT_ID,
+//     });
+
+//     const payload = ticket.getPayload();
+//     const { email, name } = payload;
+
+//     // Kiểm tra người dùng có tồn tại trong database không
+//     let user = await User.findOne({ email });
+
+//     if (!user) {
+//       // Nếu người dùng không tồn tại, tạo một người dùng mới
+//       user = await User.create({
+//         email,
+//         name,
+//         password: "",    // Vì đăng nhập bằng Google, không cần mật khẩu
+//       });
+//     }
+
+//     const { password, role, refreshToken, ...userData } = user.toObject();
+
+//     // Tạo access token và refresh token
+//     const accessToken = generateAccessToken(user._id, role);
+//     const newRefreshToken = generateRefreshToken(user._id);
+
+//     // Lưu refreshToken vào database
+//     await User.findByIdAndUpdate(
+//       user._id,
+//       { refreshToken: newRefreshToken },
+//       { new: true }
+//     );
+
+//     // Lưu refreshToken vào cookie
+//     res.cookie("refreshToken", newRefreshToken, {
+//       httpOnly: true,
+//       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+//     });
+
+//     // Trả về accessToken và dữ liệu người dùng
+//     return res.status(200).json({
+//       success: true,
+//       accessToken,
+//       userData,
+//     });
+//   } catch (error) {
+//     console.error("Google login error:", error);
+//     return res.status(500).json({
+//       success: false,
+//       mes: "Google login failed",
+//     });
+//   }
+// });
 const googleLogin = asyncHandler(async (req, res) => {
   const { token } = req.body;
 
@@ -625,7 +731,21 @@ const googleLogin = asyncHandler(async (req, res) => {
     });
 
     const payload = ticket.getPayload();
+    
+    // Ghi lại log để kiểm tra payload trả về từ Google
+    console.log("Google payload:", payload);
+
     const { email, name } = payload;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        mes: "Email not found in Google token",
+      });
+    }
+
+    // Tách họ và tên từ name nếu firstname và lastname không tồn tại
+    const [firstname = "", lastname = ""] = name ? name.split(" ") : ["", ""];
 
     // Kiểm tra người dùng có tồn tại trong database không
     let user = await User.findOne({ email });
@@ -634,8 +754,9 @@ const googleLogin = asyncHandler(async (req, res) => {
       // Nếu người dùng không tồn tại, tạo một người dùng mới
       user = await User.create({
         email,
-        name,
-        password: "",    // Vì đăng nhập bằng Google, không cần mật khẩu
+        firstname,
+        lastname,
+        password: "",  // Vì đăng nhập bằng Google, không cần mật khẩu
       });
     }
 
@@ -666,13 +787,231 @@ const googleLogin = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Google login error:", error);
+
     return res.status(500).json({
       success: false,
-      mes: "Google login failed",
+      mes: error.message || "Google login failed",
     });
   }
 });
 
+const sendVerificationCode = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ success: false, message: "Missing email" });
+  }
+
+  if (email === req.user?.email) {
+    return res.status(400).json({ success: false, message: "New email cannot be the same as the current email" });
+  }
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(400).json({ success: false, message: "Email already in use" });
+  }
+
+  const verificationCode = crypto.randomBytes(3).toString("hex").toUpperCase(); // Generate verification code
+  await User.findByIdAndUpdate(req.user?._id);
+
+  // HTML email structure
+  const html = `
+    <div style="
+        font-family: Poppins, sans-serif;
+        max-width: 600px;
+        padding: 20px; 
+        border-radius: 10px; 
+        background-color: #f1f1f1;
+    ">
+      <h2 style="
+          text-align: center; 
+          font-size: 30px; 
+          color: #6D8777;
+          font-weight: bold;
+      ">Email Verification Code</h2>
+      
+      <p style="
+          font-size: 16px; 
+          color: #555;
+          margin-bottom: 10px;
+      ">You requested a verification code to change to new Email. Use the code below to complete your email verification.</p>
+      
+      <p style="
+          font-size: 32px; 
+          font-weight: bold; 
+          text-align: center;
+          color: #FFE7B4;
+          background: #6D8777;
+          border-radius: 10px; 
+          width: 150px;
+          padding: 5px;
+          margin: auto;
+      ">${verificationCode}</p>
+      
+      <p style="
+          font-size: 14px; 
+          color: #999;
+          margin-top: 10px;
+      ">If you did not request this, please ignore this email.</p>
+    </div>
+  `;
+
+  try {
+    await sendMail({
+      email,
+      subject: "Email Verification Code",
+      text: `Your verification code is: ${verificationCode}`,
+      html,
+    });
+    return res.status(200).json({ success: true, message: "Verification code sent" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Error sending verification code" });
+  }
+};
+
+const verifyCodeAndUpdateEmail = async (req, res) => {
+  const { verificationCode, email } = req.body;
+
+  if (!verificationCode || !email) {
+    return res.status(400).json({ success: false, message: 'Missing inputs' });
+  }
+
+  if (!req.user || !req.user._id) {
+    return res.status(401).json({ success: false, message: 'User not authenticated' });
+  }
+
+  const user = await User.findById(req.user._id, {
+    verificationCode,
+    verificationCodeExpires: Date.now() + 10 * 60 * 1000, // Code valid for 10 minutes
+  });
+  if (!user) {
+    return res.status(400).json({ success: false, message: 'User not found' });
+  }
+
+  if (user.verificationCodeExpires < Date.now()) {
+    return res.status(400).json({ success: false, message: 'Verification code has expired' });
+  }
+
+  if (user.verificationCode !== verificationCode) {
+    return res.status(400).json({ success: false, message: 'Invalid verification code' });
+  }
+
+  user.email = email; // Update email
+  user.verificationCode = undefined; // Clear verification code
+  user.verificationCodeExpires = undefined; // Clear expiration
+  await user.save();
+
+  return res.status(200).json({ success: true, message: 'Email updated successfully' });
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Missing old or new password' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Incorrect old password' });
+    }
+
+    if (oldPassword === newPassword) {
+      return res.status(400).json({ success: false, message: 'New password must be different from the old password' });
+    }
+
+    const salt = await bcrypt.genSaltSync(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    user.passwordChangeAt = Date.now(); 
+
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+const sendOTP = async (req, res) => {
+  let { mobile } = req.body;
+
+  // Chuẩn hóa số điện thoại với mã quốc gia nếu chưa có
+  if (!mobile?.startsWith("+")) {
+    mobile = `+84${mobile.slice(1)}`;
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    // if (user.mobile === mobile) {
+    //   return res.status(400).send("New phone number cannot be the same as the current number.");
+    // }
+
+    // const existingUser = await User.findOne({ mobile });
+    // if (existingUser && existingUser._id !== user._id) {
+    //   return res.status(400).send("This phone number is already associated with another account.");
+    // }
+
+    // Gửi OTP qua dịch vụ Verify của Twilio
+    await clientPN.verify.v2
+      .services(process.env.TWILIO_SERVICE_SID)
+      .verifications.create({
+        to: mobile,
+        channel: "sms",
+      });
+
+    // Lưu thông tin OTP vào cơ sở dữ liệu
+    user.newMobile = mobile;
+    await user.save();
+
+    res.status(200).send("OTP sent successfully");
+  } catch (error) {
+    console.error("Error in sendOTP:", error);
+    res.status(500).send("Failed to send OTP");
+  }
+};
+
+const verifyAndUpdateMobile = async (req, res) => {
+  const { otp } = req.body;
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Xác minh OTP thông qua dịch vụ Verify của Twilio
+    const verification = await clientPN.verify.v2
+      .services(process.env.TWILIO_SERVICE_SID)
+      .verificationChecks.create({
+        to: user.newMobile,
+        code: otp,
+      });
+
+    if (verification.status === "approved") {
+      // Cập nhật số điện thoại sau khi OTP hợp lệ
+      user.mobile = user.newMobile;
+      user.newMobile = undefined; // Xóa số mới sau khi xác nhận
+      await user.save();
+
+      res.status(200).send("Mobile number updated successfully");
+    } else {
+      res.status(400).send("Invalid OTP");
+    }
+  } catch (error) {
+    console.error("Error in verifyAndUpdateMobile:", error);
+    res.status(500).send("Failed to verify OTP and update mobile number");
+  }
+};
 
 module.exports = {
   register,
@@ -692,5 +1031,11 @@ module.exports = {
   removeProductInCart,
   updateWishList,
   getUsersToday,
-  googleLogin
+  googleLogin,
+  sendVerificationCode,
+  verifyCodeAndUpdateEmail,
+  changePassword,
+  sendOTP,
+  verifyAndUpdateMobile,
+  
 };

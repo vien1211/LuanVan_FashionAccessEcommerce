@@ -29,6 +29,13 @@ router.put(
 );
 
 router.put(
+  "/update-variant/:variantId",
+  [verifyAccessToken, isAdmin],
+  uploader.fields([{ name: "images", maxCount: 10 }]),
+  ctrls.updateVariant
+);
+
+router.put(
   "/:pid",
   [verifyAccessToken, isAdmin],
   uploader.fields([{ name: "images", maxCount: 10 }]),

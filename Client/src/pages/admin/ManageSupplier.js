@@ -12,6 +12,8 @@ import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { showModal } from "../../store/app/appSlice";
 import moment from "moment";
+import icons from "../../ultils/icons";
+const {CiEdit, CiEraser, CiUndo } = icons;
 
 const ManageSupplier = () => {
   const {
@@ -252,23 +254,23 @@ const ManageSupplier = () => {
                       {editEl?._id === el._id ? (
                         <span
                           onClick={() => setEditEl(null)}
-                          className="px-4 py-2 text-white cursor-pointer bg-gray-800 rounded-[5px] hover:bg-gray-500 transition duration-150"
+                          className="px-2 py-2 text-white cursor-pointer bg-gray-800 rounded-full hover:bg-gray-500 transition duration-150"
                         >
-                          Cancel
+                          <CiUndo size={20} />
                         </span>
                       ) : (
                         <span
                           onClick={() => setEditEl(el)}
-                          className="px-4 py-2 text-white cursor-pointer bg-main rounded-[5px] hover:bg-[#79a076] transition duration-150"
+                          className="px-2 py-2 text-white cursor-pointer bg-main rounded-full hover:bg-[#79a076] transition duration-150"
                         >
-                          Edit
+                          <CiEdit size={20} />
                         </span>
                       )}
                       <span
                         onClick={() => handleDeleteCategory(el._id)}
-                        className="px-4 py-2 text-white cursor-pointer bg-red-600 rounded-[5px] hover:bg-red-700 transition duration-150"
+                        className="px-2 py-2 text-white cursor-pointer bg-red-600 rounded-full hover:bg-red-700 transition duration-150"
                       >
-                        Delete
+                        <CiEraser size={20} />
                       </span>
                     </td>
                   </tr>

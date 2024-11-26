@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { InputField, Pagination, InputSelect, CustomVariant } from "../../components";
+import {
+  InputField,
+  Pagination,
+  InputSelect,
+  CustomVariant,
+  InputForm,
+} from "../../components";
 import { useForm } from "react-hook-form";
 import { apiGetProducts, apiDeleteProduct } from "../../apis/product";
 import moment from "moment";
@@ -14,8 +20,10 @@ import { sorts } from "../../ultils/contants";
 import icons from "../../ultils/icons";
 import UpdateProduct from "./UpdateProduct";
 import Swal from "sweetalert2";
+import UpdateVariant from "./UpdateVariant";
+import { formatMoney } from "../../ultils/helper";
 
-const { HiFilter } = icons;
+const { IoFilterOutline, CiEdit, CiEraser, CiMedicalClipboard } = icons;
 
 const ManageProduct = () => {
   const {
@@ -35,12 +43,19 @@ const ManageProduct = () => {
   const [showSortOptions, setShowSortOptions] = useState({});
   const [editProduct, setEditProduct] = useState(null);
   const [update, setUpdate] = useState(false);
-  const [customVariant, setCustomVariant] = useState(null)
+  const [customVariant, setCustomVariant] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
 
   const render = useCallback(() => {
     setUpdate(!update);
   });
+  const [expandedRow, setExpandedRow] = useState(null); // Track which product's variants to show
+  const [editingVariant, setEditingVariant] = useState(null);
+
+  const handleVariantToggle = (productId) => {
+    // Toggle the visibility of the variants for the clicked product
+    setExpandedRow(expandedRow === productId ? null : productId);
+  };
 
   const filteredTitleSorts = sorts.filter((sort) => {
     return sort.text.includes("Alphabet");
@@ -190,18 +205,47 @@ const ManageProduct = () => {
         }
       }
     });
-  }
+  };
+
+  const handleSaveVariant = (variantId) => {
+    // Thực hiện cập nhật variant ở đây (có thể gọi API hoặc cập nhật local state)
+    console.log(
+      "Updating variant with ID:",
+      variantId,
+      "New values:",
+      editingVariant
+    );
+    setEditingVariant(null); // Đóng form sau khi lưu
+  };
 
   return (
     <div className="w-full p-4 my-4 relative">
       {editProduct && (
         <div className="absolute inset-0 z-50 min-h-screen bg-[#F5F5FA] ">
-          <UpdateProduct editProduct={editProduct} render={render} setEditProduct={setEditProduct} />
+          <UpdateProduct
+            editProduct={editProduct}
+            render={render}
+            setEditProduct={setEditProduct}
+          />
         </div>
       )}
       {customVariant && (
-        <div className="absolute inset-0 z-50 min-h-screen bg-[#F5F5FA] ">
-          <CustomVariant customVariant={customVariant} render={render} setCustomVariant={setCustomVariant} />
+        <div className="absolute z-20 inset-0 min-h-screen bg-[#F5F5FA] ">
+          <CustomVariant
+            customVariant={customVariant}
+            render={render}
+            setCustomVariant={setCustomVariant}
+          />
+        </div>
+      )}
+      {editingVariant && (
+        <div className="absolute z-10 inset-0 min-h-screen bg-[#F5F5FA] ">
+          <UpdateVariant
+            editingVariant={editingVariant}
+            render={render}
+            setEditingVariant={setEditingVariant}
+            // fetchUpdatedVariants={fetchUpdatedVariants}
+          />
         </div>
       )}
 
@@ -231,10 +275,10 @@ const ManageProduct = () => {
               <th className="px-2 py-2">Image</th>
               <th className="px-2 py-2 relative">
                 <div className="flex items-center gap-2 ">
-                  Title <HiFilter onClick={() => toggleSortOptions("title")} />
+                  Title <IoFilterOutline onClick={() => toggleSortOptions("title")} />
                 </div>
                 {showSortOptions.title && (
-                  <div className="absolute w-[150px] bg-white text-main border border-gray-300 mt-3 rounded shadow-lg">
+                  <div className="absolute w-[150px] bg-white text-main border font-light border-gray-300 mt-3 rounded shadow-lg">
                     {filteredTitleSorts.map((option) => (
                       <div
                         key={option.id}
@@ -251,10 +295,10 @@ const ManageProduct = () => {
               <th className="px-2 py-2 relative">
                 <div className="flex items-center gap-2 ">
                   Category{" "}
-                  <HiFilter onClick={() => toggleSortOptions("category")} />
+                  <IoFilterOutline onClick={() => toggleSortOptions("category")} />
                 </div>
                 {showSortOptions.category && (
-                  <div className="absolute w-[110px] bg-white text-main border border-gray-300 mt-3 rounded shadow-lg">
+                  <div className="absolute w-[110px] bg-white text-main border font-light border-gray-300 mt-3 rounded shadow-lg">
                     {categorySorts.map((option) => (
                       <div
                         key={option.id}
@@ -269,10 +313,10 @@ const ManageProduct = () => {
               </th>
               <th className="px-2 py-2 relative">
                 <div className="flex items-center gap-2 ">
-                  Brand <HiFilter onClick={() => toggleSortOptions("brand")} />
+                  Brand <IoFilterOutline onClick={() => toggleSortOptions("brand")} />
                 </div>
                 {showSortOptions.brand && (
-                  <div className="absolute w-[90px] bg-white text-main border border-gray-300 mt-3 rounded shadow-lg">
+                  <div className="absolute w-[90px] bg-white text-main border font-light border-gray-300 mt-3 rounded shadow-lg">
                     {brandSorts.map((option) => (
                       <div
                         key={option.id}
@@ -288,10 +332,10 @@ const ManageProduct = () => {
 
               <th className="px-2 py-2 relative">
                 <div className="flex items-center gap-2">
-                  Price <HiFilter onClick={() => toggleSortOptions("price")} />
+                  Price <IoFilterOutline onClick={() => toggleSortOptions("price")} />
                 </div>
                 {showSortOptions.price && (
-                  <div className="absolute w-[135px] bg-white text-main border border-gray-300 mt-3 rounded shadow-lg">
+                  <div className="absolute w-[135px] bg-white text-main border font-light border-gray-300 mt-3 rounded shadow-lg">
                     {filteredPriceSorts.map((option) => (
                       <div
                         key={option.id}
@@ -305,13 +349,13 @@ const ManageProduct = () => {
                 )}
               </th>
 
-              {/* <th className="px-2 py-2 relative">
+              <th className="px-2 py-2 relative">
                 <div className="flex items-center gap-2">
                   Quantity{" "}
-                  <HiFilter onClick={() => toggleSortOptions("quantity")} />
+                  <IoFilterOutline onClick={() => toggleSortOptions("quantity")} />
                 </div>
                 {showSortOptions.quantity && (
-                  <div className="absolute w-[145px] bg-white text-main border border-gray-300 mt-3 rounded shadow-lg">
+                  <div className="absolute w-[145px] bg-white text-main border font-light border-gray-300 mt-3 rounded shadow-lg">
                     {quantitySorts.map((option) => (
                       <div
                         key={option.id}
@@ -323,14 +367,14 @@ const ManageProduct = () => {
                     ))}
                   </div>
                 )}
-              </th> */}
+              </th>
 
               <th className="px-2 py-2 relative">
                 <div className="flex items-center gap-2">
-                  Sold <HiFilter onClick={() => toggleSortOptions("sold")} />
+                  Sold <IoFilterOutline onClick={() => toggleSortOptions("sold")} />
                 </div>
                 {showSortOptions.sold && (
-                  <div className="absolute w-[115px] bg-white text-main border border-gray-300 mt-3 rounded shadow-lg">
+                  <div className="absolute w-[115px] bg-white text-main border font-light border-gray-300 mt-3 rounded shadow-lg">
                     {soldSorts.map((option) => (
                       <div
                         key={option.id}
@@ -346,17 +390,17 @@ const ManageProduct = () => {
 
               <th className="px-2 py-2">
                 <div className="flex items-center gap-2">
-                  Color <HiFilter />
+                  Color 
                 </div>
               </th>
 
               <th className="px-2 py-2 relative">
                 <div className="flex items-center gap-2">
                   Rating{" "}
-                  <HiFilter onClick={() => toggleSortOptions("totalRatings")} />
+                  <IoFilterOutline onClick={() => toggleSortOptions("totalRatings")} />
                 </div>
                 {showSortOptions.totalRatings && (
-                  <div className="absolute w-[135px] bg-white text-main border border-gray-300 mt-3 rounded shadow-lg">
+                  <div className="absolute w-[135px] bg-white text-main border font-light border-gray-300 mt-3 rounded shadow-lg">
                     {ratingSorts.map((option) => (
                       <div
                         key={option.id}
@@ -371,83 +415,147 @@ const ManageProduct = () => {
               </th>
 
               <th className="px-2 py-2">
-                <div className="flex items-center gap-2">
-                  Variant
-                </div>
+                <div className="flex items-center gap-2">Variant</div>
               </th>
-             
-           
-         
 
               {/* <th className="px-2 py-2">Ratings</th> */}
-              <th className="px-2 py-2">
+              {/* <th className="px-2 py-2">
                 <div className="flex items-center gap-2">
-                  UpdatedAt <HiFilter />
+                  UpdatedAt 
                 </div>
-              </th>
+              </th> */}
               <th className="px-2 py-2">Action</th>
             </tr>
           </thead>
 
           <tbody>
             {products?.map((el, index) => (
-              <tr
-                key={el._id}
-                className={` border-y-main text-[13px] ${
-                  index % 2 === 0 ? "bg-white" : "bg-gray-200"
-                }`}
-              >
-                <td className="px-2 py-2">
-                  {(+params.get("page") > 1 ? +params.get("page") - 1 : 0) *
-                    process.env.REACT_APP_LIMIT +
-                    index +
-                    1}
-                </td>
-                <td className="py-2 px-2">
-                   
-                <img
-                        src={el.images[0]}
-                        alt={el.title}
-                        className="w-[80px] h-[80px] object-contain"
-                      />
-                      
-                    
+              <React.Fragment key={el._id}>
+                <tr
+                  className={` border-y-main text-[13px] ${
+                    index % 2 === 0 ? "bg-white" : "bg-gray-200"
+                  }`}
+                >
+                  <td className="px-2 py-2">
+                    {(+params.get("page") > 1 ? +params.get("page") - 1 : 0) *
+                      process.env.REACT_APP_LIMIT +
+                      index +
+                      1}
                   </td>
-                <td className="px-2 py-2">{el.title}</td>
-                <td className="px-2 py-2">{el.category}</td>
-                <td className="px-2 py-2">{el.brand}</td>
-                <td className="px-2 py-2">{el.price}</td>
-                {/* <td className="px-2 py-2">
-                {el.stock?.quantity || 0}
-                
-                </td> */}
-                <td className="px-2 py-2">{el.sold}</td>
-                <td className="px-2 py-2">{el.color}</td>
-                <td className="px-2 py-2">{el.totalRatings}</td>
-                <td className="px-2 py-2">{el?.variant?.length || 0}</td>
-                <td className="px-2 py-2">
-                  {moment(el.createdAt).format("DD/MM/YYYY")}
-                </td>
-                <td className="py-8 px-1 flex gap-2">
-                  <span
-                    onClick={() => setEditProduct(el)}
-                    className="px-3 py-2 text-white cursor-pointer bg-main rounded-[5px] hover:bg-[#79a076] transition duration-150"
+                  <td className="py-2">
+                    <img
+                      src={el.images[0]}
+                      alt={el.title}
+                      className="w-[60px] h-[60px] object-cover border rounded-lg"
+                    />
+                  </td>
+                  <td className="px-2 py-2">{el.title}</td>
+                  <td className="px-2 py-2">{el.category}</td>
+                  <td className="px-2 py-2">{el.brand}</td>
+                  <td className="px-2 py-2">{`${formatMoney(el.price)} VNĐ`}</td>
+                  <td className="px-2 py-2">
+                    {el.stockInfo?.[el.color]?.quantity || 0}
+                  </td>
+                  <td className="px-2 py-2">{el.sold}</td>
+                  <td className="px-2 py-2">{el.color}</td>
+                  <td className="px-2 py-2">{el.totalRatings}</td>
+                  <td
+                    className="px-2 py-2 cursor-pointer hover:text-[24px]"
+                    onClick={() => handleVariantToggle(el._id)}
                   >
-                    Edit
-                  </span>
-                  <span 
-                  onClick={() => handleDeleteProduct(el._id)}
-                  className="px-3 py-2 text-white cursor-pointer bg-red-600 rounded-[5px] hover:bg-red-700 transition duration-150">
-                    Delete
-                  </span>
+                    {el?.variant?.length || 0}
+                  </td>
+                  {/* <td className="px-2 py-2">
+                    {moment(el.createdAt).format("DD/MM/YYYY")}
+                  </td> */}
+                  <td className="py-8 px-1 flex gap-2">
+                    <span
+                      onClick={() => setEditProduct(el)}
+                      className="px-2 py-2 text-white cursor-pointer bg-[#798b7d] rounded-full hover:bg-[#79a076] transition duration-150"
+                    >
+                      <CiEdit size={20} />
+                    </span>
+                    <span
+                      onClick={() => handleDeleteProduct(el._id)}
+                      className="px-2 py-2 text-white cursor-pointer bg-red-600 rounded-full hover:bg-red-700 transition duration-150"
+                    >
+                      <CiEraser size={20} />
+                    </span>
 
-                  <span 
-                  onClick={() => setCustomVariant(el)}
-                  className="px-3 py-2 text-white cursor-pointer bg-[#8171cf] rounded-[5px] hover:bg-red-700 transition duration-150">
-                    Variant
-                  </span>
-                </td>
-              </tr>
+                    <span
+                      onClick={() => setCustomVariant(el)}
+                      // onClick={() => handleVariantToggle(el._id)}
+                      className="px-2 py-2 text-white cursor-pointer bg-[#8171cf] rounded-full hover:bg-[#7d66f0] transition duration-150"
+                    >
+                      <CiMedicalClipboard size={20} />
+                    </span>
+                  </td>
+                </tr>
+                {expandedRow === el._id && (
+                  <tr className="">
+                    <td colSpan={12} className="py-4 px-6">
+                      <div>
+                        <h4 className="font-bold">"{el.title}" Variants:</h4>
+                        <table className="w-full table-auto border-collapse my-4 text-[13px]">
+                          <thead className="bg-[#bcc4bb]">
+                            <tr>
+                              <th className="border p-2">Images</th>
+                              <th className="border p-2">Title</th>
+                              <th className="border p-2">Color</th>
+                              <th className="border p-2">Price</th>
+                              <th className="border p-2">Quantity</th>
+                             
+                              <th className="border p-2">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white">
+                            {el.variant.map((variant) => {
+                              const stockQuantity =
+                                el.stockInfo[variant.color]?.quantity || 0;
+
+                              return (
+                                <tr key={variant._id}>
+                                  <td className=" border py-2 px-2">
+                                    <img
+                                      src={variant.images[0]}
+                                      alt={variant.title}
+                                      className="w-[60px] h-[60px] object-cover rounded-lg"
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    {variant.title}
+                                  </td>
+                                  <td className="border p-2">
+                                    {variant.color}
+                                  </td>
+                                  <td className="border p-2">
+                                  {`${formatMoney(variant.price)} VNĐ`}
+                                    
+                                  </td>
+                                  <td className="border p-2">
+                                    {stockQuantity}
+                                  </td>
+                                  
+                                  <td className="border p-2">
+                                    <button
+                                      className="px-2 py-2 bg-main text-white rounded-full"
+                                      onClick={() => setEditingVariant(variant)}
+                                    >
+                                      <CiEdit size={20} />
+                                    </button>
+                                    
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                
+              </React.Fragment>
             ))}
           </tbody>
         </table>

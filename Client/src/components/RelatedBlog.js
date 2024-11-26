@@ -88,6 +88,10 @@ const RelatedBlog = ({ currentAuthor }) => {
     }
   }, [currentAuthor]);
 
+  // useEffect(() => {
+  //   window.scrollTo(0, 0);
+  // }, [currentAuthor]);
+
   return (
     <div className="max-w-6xl mx-auto px-8 py-2 border rounded-2xl shadow-lg mb-8">
       <h3 className="text-[24px] text-[rgb(61,87,68)] font-semibold my-2">

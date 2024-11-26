@@ -13,12 +13,15 @@ const ManageGoodsReceipt = () => {
   const [q, setQ] = useState("");
   const [counts, setCounts] = useState(0);
   const queriesDebounce = useDebounce(q, 800);
-
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const fetchReceipt = async (params) => {
     try {
       const response = await apiGetReceipts({
         ...params,
+        startDate,
+        endDate,
         limit: process.env.REACT_APP_LIMIT,
       });
       if (response.success) {
@@ -43,8 +46,7 @@ const ManageGoodsReceipt = () => {
     }
 
     fetchReceipt(queries);
-    
-  }, [queriesDebounce, params]);
+  }, [queriesDebounce, params, startDate, endDate]);
 
   const setValue = useCallback(
     (value) => {
@@ -60,13 +62,36 @@ const ManageGoodsReceipt = () => {
       </div>
 
       <div className="py-2 w-full overflow-x-auto">
-        <div className="flex justify-end py-2 px-2">
-          <InputField
-            nameKey={"Search..."}
-            value={q}
-            setValue={setValue}
-            style={"w-[350px] shadow-md"}
-          />
+        <div className="flex items-end justify-between px-6 py-6">
+          <div className="flex gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="font-medium mr-1">From Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="border border-gray-300 rounded px-2 py-1"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="font-medium mr-1">To Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="border border-gray-300 rounded px-2 py-1"
+              />
+            </div>
+          </div>
+          <div className="-mb-2">
+            <InputField
+              nameKey={"Search..."}
+              value={q}
+              setValue={setValue}
+              style={"w-[350px] shadow-md"}
+            />
+          </div>
         </div>
 
         <table className="table-auto w-full mb-6 text-left min-w-[1000px]">
@@ -80,7 +105,7 @@ const ManageGoodsReceipt = () => {
             </tr>
           </thead>
           <tbody>
-          {receipt?.map((el, index) => (
+            {receipt?.map((el, index) => (
               <tr
                 key={el._id}
                 className={`border-y-main text-[13px] ${
@@ -112,9 +137,8 @@ const ManageGoodsReceipt = () => {
                             <span>{item.quantity}</span>
                           </span>
 
-
                           <span className="gap-2 font-light flex items-center">
-                            <span>Import Price: </span>
+                            <span>Import Unit Price: </span>
                             <span>{`${formatMoney(item.price)} VNĐ`}</span>
                           </span>
                         </span>
@@ -122,7 +146,9 @@ const ManageGoodsReceipt = () => {
                     ))}
                   </span>
                 </td>
-                <td className="px-2 py-2">{`${formatMoney(el?.totalAmount)} VNĐ`}</td>
+                <td className="px-2 py-2">{`${formatMoney(
+                  el?.totalAmount
+                )} VNĐ`}</td>
                 <td className="px-2 py-2">
                   {moment(el.createdAt).format("DD/MM/YYYY HH:mm:ss")}
                 </td>
@@ -131,8 +157,8 @@ const ManageGoodsReceipt = () => {
           </tbody>
         </table>
         <div className="flex w-full px-4">
-        <Pagination totalCount={counts} />
-      </div>
+          <Pagination totalCount={counts} />
+        </div>
       </div>
     </div>
   );

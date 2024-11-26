@@ -12,6 +12,9 @@ import {
 } from "../../apis";
 import { useSearchParams } from "react-router-dom";
 import moment from "moment";
+import icons from "../../ultils/icons";
+import { BsPatchPlus } from "react-icons/bs";
+const {CiEdit, CiEraser, CiUndo } = icons;
 
 const ManageBlogCategory = () => {
   const {
@@ -138,7 +141,7 @@ const ManageBlogCategory = () => {
         render();
         Swal.fire({
           title: "Congratulations!",
-          text: response.mes || "Update Supplier Successful!",
+          text: response.mes,
           icon: "success",
           confirmButtonText: "OK",
           customClass: {
@@ -184,13 +187,14 @@ const ManageBlogCategory = () => {
               setEditingCategory(null);
             }
           }}
-          className={`px-4 py-2 rounded-md text-white cursor-pointer transition duration-300 ${
+          className={`px-4 py-3 rounded-[12px] text-white cursor-pointer transition duration-300 ${
             showForm
               ? "bg-gray-900 hover:bg-gray-600"
-              : "bg-pink-700 hover:bg-pink-800"
+              : "bg-[#7b2164] hover:bg-[#ac669a]"
           }`}
         >
-          {showForm ? "Cancel" : "Create New Category"}
+          
+          {showForm ? "Cancel" : <><BsPatchPlus size={24} className="inline-block mr-2" /> Create New Category</>}
         </span>
 
         {/* Form for adding/editing a category */}
@@ -243,7 +247,7 @@ const ManageBlogCategory = () => {
                 return (
                   <li
                     key={blogcategory?._id}
-                    className="flex border border-gray-300 rounded-[8px] px-4 py-4 justify-between items-center mt-2"
+                    className="flex border bg-white border-gray-300 rounded-[8px] px-4 py-3 justify-between items-center mt-2"
                   >
                     {/* Hiển thị số thứ tự */}
                     {itemIndex}. {blogcategory?.title} 
@@ -251,18 +255,18 @@ const ManageBlogCategory = () => {
                     <div className="flex gap-2">
                       <span
                         onClick={() => handleEditCategory(blogcategory._id)}
-                        className="px-4 py-2 text-white cursor-pointer bg-main rounded-[5px] hover:bg-[#79a076] transition duration-150"
+                        className="px-2 py-2 text-white cursor-pointer bg-main rounded-full hover:bg-[#79a076] transition duration-150"
                       >
-                        Edit
+                        <CiEdit size={20} />
                       </span>
 
                       <span
                         onClick={() =>
                           handleDeleteBlogCategory(blogcategory._id)
                         }
-                        className="px-4 py-2 text-white cursor-pointer bg-red-600 rounded-[5px] hover:bg-red-700 transition duration-150"
+                        className="px-2 py-2 text-white cursor-pointer bg-red-600 rounded-full hover:bg-red-700 transition duration-150"
                       >
-                        Delete
+                        <CiEraser size={20} />
                       </span>
                     </div>
                   </li>

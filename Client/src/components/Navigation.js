@@ -250,7 +250,7 @@ const Navigation = () => {
           key={el.id}
           className={({ isActive }) =>
             isActive
-              ? "pr-12 hover:text-main text-main underline"
+              ? "pr-12 hover:text-main text-main"
               : "pr-12 hover:text-main"
           }
         >
@@ -265,7 +265,8 @@ const Navigation = () => {
           onClick={handleBrandsClick}
         >
           BRANDS
-          <IoIosArrowDown className="hover:text-main" />
+          {/* <IoIosArrowDown className="hover:text-main" /> */}
+          {showPopup ? <IoIosArrowDown size={16} className="rotate-[180deg]"/> : <IoIosArrowDown size={16} className="hover:text-main"/>}
         </div>
 
         {showPopup && (
@@ -310,7 +311,8 @@ const Navigation = () => {
           onClick={handleCategoryClick}
         >
           CATEGORIES
-          <IoIosArrowDown className="hover:text-main" />
+          {/* <IoIosArrowDown className="hover:text-main" /> */}
+          {showCategoryPopup ? <IoIosArrowDown size={16} className="rotate-[180deg]"/> : <IoIosArrowDown size={16} className="hover:text-main"/>}
         </div>
 
         {showCategoryPopup && (

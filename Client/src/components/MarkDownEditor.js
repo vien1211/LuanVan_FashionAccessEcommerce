@@ -56,7 +56,7 @@ const MarkDownEditor = ({
   
   return (
     <div className="flex flex-col">
-      <span>{label}</span>
+      <span className="font-semibold mt-3 mb-2">{label}</span>
       <Editor
         apiKey="1mkp0l5t4oxb6xhs1xywjr3tsdtb2zzgreg5mblbqu7j7ykj"
         init={{

@@ -1,27 +1,4 @@
-// import React from 'react'
-// import {Outlet} from 'react-router-dom'
-// import {
-//     Header,
-//     Navigation,
-//     TopHeader,
-//     Footer
-// } from '../../components'
 
-// const Public = () => {
-//   return (
-//     <div className='bg-gradient-to-r from-[#3B5442] via-[#54795f] to-[#5d7d66] flex flex-col items-center'>
-//         {/* <TopHeader /> */}
-//         <Header />
-//         {/* <Navigation /> */}
-//         <div className='w-main mt-[150px]'>
-//             <Outlet />
-//         </div>
-//         <Footer />
-//     </div>
-//   )
-// }
-
-// export default Public
 
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
@@ -32,6 +9,7 @@ const Public = () => {
 
   // Apply background gradient only for the Home page
   const isHomePage = location.pathname === '/';
+  const isFAQPage = location.pathname === '/faq';
 
   return (
     <div
@@ -43,9 +21,11 @@ const Public = () => {
       <div className={`w-main ${isHomePage ? ' mt-[60px]' : 'mt-[120px]'}`}>
         <Outlet />
       </div>
-      {!isHomePage && <Footer />}
+      {!isHomePage && !isFAQPage && <Footer />}
     </div>
   );
 };
 
 export default Public;
+
+

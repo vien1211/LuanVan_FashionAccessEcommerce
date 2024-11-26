@@ -4,9 +4,12 @@ import {
   apiGetAllBrand,
   apiGetAllUser,
   apiGetCategories,
+  apiGetDailyProfit,
+  apiGetMonthlyProfit,
   apiGetOrderByAdmin,
   apiGetOrderToDay,
   apiGetProducts,
+  apiGetProfit,
   apiGetReceipts,
   apiGetStock,
   apiGetSuppliers,
@@ -17,14 +20,19 @@ import { LiaClipboardListSolid } from "react-icons/lia";
 import { MdOutlinePriceChange } from "react-icons/md";
 import { SlHandbag } from "react-icons/sl";
 import { LuUserPlus } from "react-icons/lu";
+import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { Link, useSearchParams } from "react-router-dom";
-import { Pie, Bar } from "react-chartjs-2";
+import { Pie, Bar, Line } from "react-chartjs-2";
 import avt from "../../assets/avtDefault.avif";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
+  PointElement,
+  LineElement,
   BarElement,
   Title,
   ArcElement,
@@ -34,12 +42,14 @@ import {
 import path from "../../ultils/path";
 import CountUp from "react-countup";
 import moment from "moment";
-import { formatMoney } from "../../ultils/helper";
+import { formatCurrencyShort, formatMoney } from "../../ultils/helper";
 
 // Register Chart.js components for pie chart
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  PointElement,
+  LineElement,
   BarElement,
   Title,
   ArcElement,
@@ -60,6 +70,8 @@ const Dashboard = () => {
   const [receipt, setReceipt] = useState(null);
   const [topSellingProducts, setTopSellingProducts] = useState(null);
   const [latestComments, setLatestComments] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [counts, setCounts] = useState({
     products: 0,
     categories: 0,
@@ -71,6 +83,9 @@ const Dashboard = () => {
     supplier: 0,
     totalRevenueToday: 0,
     totalProductsSoldToday: 0,
+    profit: 0,
+    date: [],
+    totalRevenue: [],
   });
 
   const fetchProducts = async (params) => {
@@ -283,6 +298,105 @@ const Dashboard = () => {
     }
   };
 
+  const fetchProfit = async () => {
+    const response = await apiGetProfit();
+    if (response.success) {
+      setCounts((prev) => ({
+        ...prev,
+        profit: response.profit,
+      }));
+    }
+  };
+
+  const fetchDailyProfit = async () => {
+    const response = await apiGetDailyProfit();
+    if (response.success) {
+      // Lấy dữ liệu từ API và sắp xếp theo ngày
+      const profitData = response.dailyProfit
+        .map((item) => ({
+          date: item._id,
+          totalRevenue: item.totalRevenue,
+        }))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      // Lọc 7 ngày gần nhất
+      // const last7DaysData = profitData.slice(-7);
+      const last7DaysData = profitData.filter((item) => {
+        const itemDate = new Date(item.date);
+        return (
+          (!startDate || itemDate >= startDate) &&
+          (!endDate || itemDate <= endDate)
+        );
+      });
+
+      setCounts((prev) => ({
+        ...prev,
+        dates: last7DaysData.map((item) =>
+          moment(item.date).format("DD-MM-yyyy")
+        ),
+        totalRevenue: last7DaysData.map((item) => item.totalRevenue),
+      }));
+    }
+  };
+  // const fetchDailyProfit = async () => {
+  //   const response = await apiGetDailyProfit();
+  //   if (response.success) {
+  //     const profitData = response.dailyProfit
+  //       .map((item) => ({
+  //         date: item._id, // Ngày có thể là _id hoặc trường khác trong response
+  //         totalRevenue: item.totalRevenue,
+  //       }))
+  //       .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  //     // Lọc dữ liệu theo khoảng thời gian chọn
+  //     const filteredData = profitData.filter((item) => {
+  //       const itemDate = new Date(item.date);
+  //       return (
+  //         (!startDate || itemDate >= startDate) &&
+  //         (!endDate || itemDate <= endDate)
+  //       );
+  //     });
+
+  //     setCounts({
+  //       dates: filteredData.map((item) => item.date),
+  //       totalRevenue: filteredData.map((item) => item.totalRevenue),
+  //     });
+  //   }
+  // };
+
+  const dailyProfitData = {
+    labels: counts.dates,
+    datasets: [
+      {
+        label: "Revenue (VNĐ)",
+        data: counts.totalRevenue,
+        fill: false,
+        borderColor: "#d1bc34",
+        tension: 0.3,
+      },
+    ],
+  };
+
+  const dailyProfitOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: "top",
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function (value) {
+            return formatCurrencyShort(value); // Dùng hàm format tiền tệ rút gọn
+          },
+        },
+      },
+    },
+  };
+
   const fetchUsersToday = async () => {
     const response = await apiGetUserToday(); // Assuming the backend filters today's users
     if (response.success) {
@@ -326,28 +440,18 @@ const Dashboard = () => {
     fetchSuppliers(searchParams);
     fetchReceipt(searchParams);
     fetchTopSellingProducts(searchParams);
-  }, [params]);
+    fetchDailyProfit(searchParams);
+    fetchProfit(searchParams);
+  }, [params, startDate, endDate]);
 
   const newestProducts = inventory
     ?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 3);
 
   const newestOrders = orders
-  ?.filter(order => order.status === 'Awaiting Confirmation')
+    ?.filter((order) => order.status === "Awaiting Confirmation")
     ?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
-
-  const formatCurrencyShort = (value) => {
-    if (value >= 1000000000) {
-      return (value / 1000000000).toFixed(1) + "T";
-    } else if (value >= 1000000) {
-      return (value / 1000000).toFixed(1) + "M";
-    } else if (value >= 1000) {
-      return (value / 1000).toFixed(1) + "K";
-    } else {
-      return value.toLocaleString();
-    }
-  };
 
   return (
     <div className="w-full p-6 my-2 bg-gray-50">
@@ -357,7 +461,7 @@ const Dashboard = () => {
   </div> */}
 
       {/*1-Today's Sale */}
-      <div className="bg-[#45624E] gap-6 p-5 px-8 rounded-xl mb-6">
+      <div className="bg-[#45624E] gap-6 p-5 px-8 rounded-2xl mb-6">
         <div className="mb-4">
           <h1 className="text-[24px] font-semibold text-white">Today Sales</h1>
           <span className="text-[14px] font-light text-white">
@@ -366,7 +470,7 @@ const Dashboard = () => {
         </div>
         {/* Today's Orders */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-[#273526] p-6 rounded-lg shadow-md flex flex-col hover:shadow-lg transition-shadow">
+          <div className="bg-[#273526] p-6 rounded-[16px] shadow-md flex flex-col hover:shadow-lg transition-shadow">
             <LiaClipboardListSolid size={32} className="text-[#86AFAC]" />
             <p className="py-2 text-2xl font-bold text-white">
               {counts.ordersToday}
@@ -376,7 +480,7 @@ const Dashboard = () => {
             </h2>
           </div>
 
-          <div className="bg-[#273526] p-6 rounded-lg shadow-md flex flex-col hover:shadow-lg transition-shadow">
+          <div className="bg-[#273526] p-6 rounded-[16px] shadow-md flex flex-col hover:shadow-lg transition-shadow">
             <MdOutlinePriceChange size={32} className="text-[#AB7F45]" />
             <p className="py-2 text-2xl font-bold text-white">
               {counts.totalRevenueToday
@@ -390,7 +494,7 @@ const Dashboard = () => {
           </div>
 
           {/* Products Sold Today */}
-          <div className="bg-[#273526] p-6 rounded-lg shadow-md flex flex-col hover:shadow-lg transition-shadow">
+          <div className="bg-[#273526] p-6 rounded-[16px] shadow-md flex flex-col hover:shadow-lg transition-shadow">
             <SlHandbag size={32} className="text-[#A68AA6]" />
             <p className="py-2 text-2xl font-bold text-white">
               {counts.totalProductsSoldToday}
@@ -401,7 +505,7 @@ const Dashboard = () => {
           </div>
 
           {/* New Users Today */}
-          <div className="bg-[#273526] p-6 rounded-lg shadow-md flex flex-col hover:shadow-lg transition-shadow">
+          <div className="bg-[#273526] p-6 rounded-[16px] shadow-md flex flex-col hover:shadow-lg transition-shadow">
             <LuUserPlus size={32} className="text-[#1E9FDE]" />
             <p className="py-2 text-2xl font-bold text-white">
               {counts.usersToday}
@@ -412,12 +516,12 @@ const Dashboard = () => {
       </div>
 
       {/*2-Store Summary */}
-      <div className="grid grid-cols-6 gap-3 bg-[#7d8b6fcb] p-6 rounded-2xl shadow-lg">
+      <div className="grid grid-cols-6 gap-3 bg-[#6f8b80cb] p-6 rounded-2xl shadow-lg">
         <div className="col-span-6 text-center">
-          <h1 className="text-[28px] uppercase font-semibold text-[#45624E]">
+          <h1 className="text-[32px] uppercase font-bold text-[#516859]">
             Our Store Overview
           </h1>
-          <span className="text-[14px] font-light text-slate-100">
+          <span className="text-[14px] font-normal text-slate-100">
             Store Summary
           </span>
         </div>
@@ -531,8 +635,100 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/*3-Inventory, Supplier, Add Receipt */}
-      <div className="py-5 flex gap-6">
+      {/*3-Doanh thu hàng ngày */}
+      <div className="flex gap-6">
+        {/* Biểu đồ doanh thu hàng ngày */}
+        {/* <div className="w-[70%]">
+          <div className="bg-[#f7f7f5] p-8 rounded-[20px] shadow-md my-8">
+            <h2 className="text-[20px] font-semibold mb-4">Daily Revenue</h2>
+            <Line data={dailyProfitData} options={dailyProfitOptions} />
+          </div>
+        </div> */}
+        <div className="w-[70%]">
+          <div className="bg-[#f7f7f5] p-8 rounded-[20px] shadow-md my-6">
+            <h2 className="text-[20px] font-semibold mb-2">Daily Revenue</h2>
+
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="font-medium mr-1">From Date</label>
+                {/* <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  selectsStart
+                  startDate={startDate}
+                  endDate={endDate}
+                  dateFormat="dd-MM-yyyy"
+                  className="border border-gray-300 rounded px-2 py-1"
+                  placeholderText="DD-MM-YYYY"
+                /> */}
+                <input
+                  type="date"
+                  value={
+                    startDate ? moment(startDate).format("yyyy-MM-DD") : ""
+                  }
+                  onChange={(e) => setStartDate(new Date(e.target.value))}
+                  className="border border-gray-300 rounded px-2 py-1"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="font-medium mr-1">To Date</label>
+                {/* <DatePicker
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  selectsEnd
+                  startDate={startDate}
+                  endDate={endDate}
+                  minDate={startDate}
+                  dateFormat="dd-MM-yyyy"
+                  className="border border-gray-300 rounded px-2 py-1"
+                  placeholderText="DD-MM-YYYY"
+                /> */}
+                <input
+                  type="date"
+                  value={endDate ? moment(endDate).format("yyyy-MM-DD") : ""}
+                  onChange={(e) => setEndDate(new Date(e.target.value))}
+                  className="border border-gray-300 rounded px-2 py-1"
+                />
+              </div>
+            </div>
+
+            <Line data={dailyProfitData} options={dailyProfitOptions} />
+          </div>
+        </div>
+
+        {/* Tổng lợi nhuận */}
+
+        <div className="w-[30%] my-8">
+          <div className="bg-[#273526] p-6 rounded-[20px] shadow-md flex flex-col">
+            <RiMoneyDollarCircleLine
+              size={72}
+              className="text-[#FFD700] mx-auto my-2"
+            />
+            <h2 className="text-2xl mx-auto mt-2 font-semibold text-[#FFD700]">
+              Total Profit
+            </h2>
+            <p className="py-2 text-[30px] text-center font-bold text-white">
+              {formatMoney(counts.profit)}{" "}
+            </p>
+            <span className="mx-auto text-[22px] font-semibold font-main">
+              VNĐ
+            </span>
+            <br></br>
+            <span className="text-[15px] text-center text-green-500 font-semibold font-main">
+              Total Profit is calculated as (Total Revenue) - (Total Costs).
+            </span>
+            <br></br>
+            <Link to={`/${path.ADMIN}/${path.PROFIT}`}>
+              <button className="px-2 py-2 bg-main text-white w-full rounded-lg hover:bg-[#649878]">
+                See Revenue & Profit
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/*4-Inventory, Supplier, Add Receipt */}
+      <div className="py-2 flex gap-6">
         {/* Inventory Section */}
         <div className="w-[60%] transition transform hover:scale-105 duaration-500 py-4">
           <Link to={`/${path.ADMIN}/${path.INVENTORY}`}>
@@ -642,8 +838,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-
-      {/*4-Top 10 Best Selling, Order By Method */}
+      {/*5-Top 10 Best Selling, Order By Method */}
       <div className="flex flex-col md:flex-row justify-center gap-6">
         {/* Cột trái lớn hơn */}
         <div className="w-full md:w-2/3 p-6 my-2 bg-[#ffffff] rounded-xl shadow-md">
@@ -679,8 +874,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-
-      {/*5-New Cmt Blog, 5 Newest Blog */}
+      {/*6-New Cmt Blog, 5 Newest Blog */}
       <div className="py-4 flex gap-6">
         {/* Phần bên trái: Hiển thị các comment mới nhất */}
         <div className="w-[35%] p-4 bg-white rounded-lg shadow-lg border border-gray-200">
@@ -741,30 +935,36 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/*6-New Order */}
+      {/*7-New Order */}
       <div className="w-full py-4">
         <Link to={`/${path.ADMIN}/${path.MANAGE_ORDER}`}>
-          <div className="w-full flex flex-col items-center gap-2 justify-center p-5 text-main bg-[#deeae1a1] shadow-md rounded-[20px]">
+          <div className="w-full flex flex-col items-center gap-2 justify-center p-5 text-main bg-white shadow-md rounded-[20px]">
             <h2 className="text-3xl font-semibold text-gray-600">New Order</h2>
 
-            {newestOrders?.length > 0 && (
+            {newestOrders?.length > 0 ? (
               <div className="mt-2">
                 <table className="w-full table-auto mt-2">
-                  <thead className="text-gray-500 text-[15px] text-left">
-                    <tr className="border-b border-[#addea0]">
+                  <thead className="text-gray-500 text-[15px] text-left bg-[#deeae1a1]">
+                    <tr className="border-b">
                       <th className="px-2 py-2">#</th>
                       <th className="px-2 py-2">User</th>
                       <th className="px-2 py-2">Product</th>
                       <th className="px-2 py-2">Total</th>
-                      <th className="px-2 py-2">P.Method</th>
+                      <th className="px-2 py-2">Payment Method</th>
+                      <th className="px-2 py-2">Payment Status</th>
                       {/* <th className="px-2 py-2">Status</th> */}
                       <th className="px-2 py-2">Created At</th>
                     </tr>
                   </thead>
                   <tbody>
                     {newestOrders.map((el, index) => (
-                      <tr key={el._id} className="font-light text-[13px] border-b border-[#addea0]">
-                        <td className="px-4 py-2 border-b border-[#addea0]">{index + 1}</td>
+                      <tr
+                        key={el._id}
+                        className="font-light text-[13px] border-b border-slate-200"
+                      >
+                        <td className="px-4 py-2 border-b border-slate-200">
+                          {index + 1}
+                        </td>
                         <td className="px-2 py-2">
                           <span className="flex flex-col">
                             <span className="font-medium">
@@ -805,15 +1005,24 @@ const Dashboard = () => {
                         <td className="px-2 py-2">{`${formatMoney(
                           el.total
                         )} VNĐ`}</td>
-                        <td className="px-2 py-2">{el.paymentMethod}</td>
+                        <td className="px-2 py-2 uppercase">
+                          {el.paymentMethod}
+                        </td>
+                        <td className="px-2 py-2 uppercase">
+                          {el.paymentStatus}
+                        </td>
                         {/* <td className="py-2 px-2">{el.status}</td> */}
                         <td className="px-2 py-2">
-                          {moment(el.createdAt).format("DD/MM/YYYY")}
+                          {moment(el.createdAt).format("DD/MM/YYYY hh:mm A")}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+            ) : (
+              <div className="mt-4 text-gray-500 text-lg font-semibold">
+                No new orders
               </div>
             )}
           </div>

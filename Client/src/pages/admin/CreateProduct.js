@@ -231,11 +231,9 @@ const CreateProduct = () => {
               register={register}
               errors={errors}
               id="price"
-              validate={{
-                required: "Require",
-              }}
               fullWidth={true}
-              style="flex-auto rounded-md"
+              readOnly={true}
+              style="flex-auto rounded-md opacity-70"
               placeholder="Price of Product"
               type="number"
             />

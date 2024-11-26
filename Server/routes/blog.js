@@ -13,7 +13,7 @@ router.put('/uploadimage/:bid', [verifyAccessToken, isAdmin], uploader.single('i
 router.put('/like/:bid', [verifyAccessToken], ctrls.likeBlog)
 router.put('/dislike/:bid', [verifyAccessToken], ctrls.dislikeBlog)
 router.put('/:bid', [verifyAccessToken, isAdmin], uploader.single('image', 10),ctrls.updateBlog)
-router.delete('/:bid', [verifyAccessToken, isAdmin], ctrls.deleteBlog)
+router.delete('/:bid', [verifyAccessToken], ctrls.deleteBlog)
 
 
 module.exports = router

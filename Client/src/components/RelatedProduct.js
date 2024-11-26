@@ -34,7 +34,7 @@ const RelatedProduct = () => {
   return (
     <div className="related-products">
       <h3 className="text-[22px] font-semibold py-2 border-b-2 border-main">
-        Related Product
+      You May Also Like
       </h3>
       <Slider {...settings}>
         {relatedProducts?.map((productData, index) => (

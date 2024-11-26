@@ -40,67 +40,11 @@ const updateBlog = asyncHandler(async (req, res) => {
   });
 });
 
-// const updateBlog = asyncHandler(async (req, res) => {
-//   const { bid } = req.params;
-//   const file = req?.file;
-//   if (file?.image) req.body.image = file?.image?.map((el) => el.path);
-//   if (req.body && req.body.title) req.body.slug = slugify(req.body.title);
-//   const updatedBlog = await Product.findByIdAndUpdate(bid, req.body, {
-//     new: true,
-//   });
-//   return res.status(200).json({
-//     success: updatedBlog ? true : false,
-//     updatedBlog: updatedBlog ? updatedBlog : "Cannot update product",
-//   });
-// });
-
-// const getAllBlog = asyncHandler(async(req, res) => {
-//     const response = await Blog.find()
-//     return res.json({
-//         success: response ? true : false,
-//         AllBlog: response ? response: 'Cannot Get All Blog!'
-//     })
-// })
-
-// const getAllBlog = asyncHandler(async (req, res) => {
-//     // Retrieve all blogs from the database and populate the 'likes' and 'dislikes' fields
-//     const blogs = await Blog.find()
-//         .populate('likes', 'firstname lastname')  // Populate likes with first name and last name
-//         .populate('dislikes', 'firstname lastname'); // Populate dislikes with first name and last name
-
-//     // If no blogs are found, return an empty array
-//     if (!blogs || blogs.length === 0) {
-//         return res.status(404).json({ success: false, message: 'No blogs found.' });
-//     }
-
-//     // Map over all blogs and structure the response
-//     const formattedBlogs = blogs.map(blog => ({
-//         _id: blog._id,
-//         title: blog.title,
-//         description: blog.description,
-//         category: blog.category,
-//         numberView: blog.numberView,
-//         likes: blog.likes, // Count of likes
-//         dislikes: blog.dislikes, // Count of dislikes
-//         likesCount: blog.likes?.length, // Count of likes
-//         dislikesCount: blog.dislikes?.length, // Count of dislikes
-//         image: blog.image,
-//         author: blog.author,
-//         createdAt: blog.createdAt,
-//         updatedAt: blog.updatedAt,
-//     }));
-
-//     // Return the list of blogs with structured data
-//     return res.json({
-//         success: true,
-//         AllBlog: formattedBlogs,  // Send the formatted blog data
-//     });
-// });
 
 const getAllBlog = asyncHandler(async (req, res) => {
     try {
       const queries = { ...req.query };
-      const excludeFields = ["limit", "sort", "page", "fields"];
+      const excludeFields = ["limit", "sort", "page", "fields", "q"];
       
       // Exclude specified fields from the query
       excludeFields.forEach((el) => delete queries[el]);
@@ -112,21 +56,9 @@ const getAllBlog = asyncHandler(async (req, res) => {
         (match) => `$${match}`
       );
       const formattedQueries = JSON.parse(queryString);
-  
-      if (queries?.title) {
+
+      if (queries?.title)
         formattedQueries.title = { $regex: queries.title, $options: "i" };
-      }
-    //   if (queries?.category) {
-    //     formattedQueries.category = { $regex: queries.category, $options: "i" };
-    //   }
-    if (queries?.category) {
-        const categoryId = await BlogCategory.findOne({ title: queries.category }).select('_id');
-        if (categoryId) {
-          formattedQueries.category = categoryId._id;
-        } else {
-          return res.status(200).json({ success: true, AllBlog: [], counts: 0 });
-        }
-      }
 
       if (queries?.author) {
         const author = await User.findOne({ firstname: queries.author }).select('_id');
@@ -136,32 +68,58 @@ const getAllBlog = asyncHandler(async (req, res) => {
           return res.status(200).json({ success: true, AllBlog: [], counts: 0 });
         }
       }
-  
-      // Merging search queries if provided
-      let queryObject = {};
-      if (queries?.q) {
-        delete formattedQueries.q;
-        queryObject = {
-          $or: [
-            { title: { $regex: queries.q, $options: "i" } },
-            { content: { $regex: queries.q, $options: "i" } },
-            { category: { $regex: queries.q, $options: "i" } },
-          ],
-        };
-      }
-  
-      // Merging all queries
-      const finalQuery = {
-        ...formattedQueries,
-        ...queryObject,
-      };
 
-      if (req.user && req.user._id) {
-        finalQuery.author = req.user._id;  // Only get blogs by the logged-in user
+      if (queries?.category) {
+        const categoryId = await BlogCategory.findOne({ title: queries.category }).select('_id');
+        if (categoryId) {
+          formattedQueries.category = categoryId._id;
+        } else {
+          return res.status(200).json({ success: true, AllBlog: [], counts: 0 });
+        }
       }
+  
+      if (req.query.q) {
+        delete formattedQueries.q;
+        formattedQueries["$or"] = [
+          { title: { $regex: req.query.q, $options: "i" } },
+          // { author: { $regex: req.query.q, $options: "i" } },
+          { address: { $regex: req.query.q, $options: "i" } },
+          { contact: { $regex: req.query.q, $options: "i" } },
+        ];
+      }
+  
+    //   if (queries?.title) {
+    //     formattedQueries.title = { $regex: queries.title, $options: "i" };
+    //   }
+    
+
+   
+  
+    //   // Merging search queries if provided
+    //   let queryObject = {};
+    //   if (queries?.q) {
+    //     delete formattedQueries.q;
+    //     queryObject = {
+    //       $or: [
+    //         { title: { $regex: queries.q, $options: "i" } },
+    //         { content: { $regex: queries.q, $options: "i" } },
+    //         { category: { $regex: queries.q, $options: "i" } },
+    //       ],
+    //     };
+    //   }
+  
+    //   // Merging all queries
+    //   const finalQuery = {
+    //     ...formattedQueries,
+    //     ...queryObject,
+    //   };
+
+    //   if (req.user && req.user._id) {
+    //     finalQuery.author = req.user._id;  // Only get blogs by the logged-in user
+    //   }
   
       // Building the query
-      let queryCommand = Blog.find(finalQuery)
+      let queryCommand = Blog.find(formattedQueries)
         .populate("category", "title")
         .populate("author", "firstname lastname")
         .populate({
@@ -171,6 +129,8 @@ const getAllBlog = asyncHandler(async (req, res) => {
             select: "firstname lastname avatar", 
           },
         })
+
+        
   
       // Sorting
       if (req.query.sort) {
@@ -196,7 +156,8 @@ const getAllBlog = asyncHandler(async (req, res) => {
   
       // Execute query
       const blogs = await queryCommand.exec();
-      const counts = await Blog.countDocuments(finalQuery);
+      
+      const counts = await Blog.countDocuments(formattedQueries);
       
       // Response
       return res.status(200).json({
@@ -213,65 +174,7 @@ const getAllBlog = asyncHandler(async (req, res) => {
   });  
   
 
-// const likeBlog = asyncHandler(async(req, res) => {
-//     const { _id } = req.user
-//     const { bid } = req.params
-//     console.log(bid)
-//     if(!bid) throw new Error('Missing Inputs')
-//     const blog = await Blog.findById(bid)
-//     const alreadyDisliked = blog?.dislikes?.find(el => el.toString() === _id)
-//     if(alreadyDisliked){
-//         const response = await Blog.findByIdAndUpdate(bid, { $pull: {dislikes: _id} }, {new: true})
-//         return res.json({
-//             success: response ? true : false,
-//             rs: response
-//         })
-//     }
-//     const isLiked = blog?.likes.find(el => el.toString() === _id)
-//     if(isLiked) {
-//         const response = await Blog.findByIdAndUpdate(bid, {$pull: {likes: _id}, }, {new: true})
-//         return res.json({
-//             success: response ? true : false,
-//             rs: response
-//         })
-//     } else {
-//         const response = await Blog.findByIdAndUpdate(bid, {$push: {likes: _id}, }, {new: true})
-//         return res.json({
-//             success: response ? true : false,
-//             rs: response
-//         })
-//     }
-// })
 
-// const dislikeBlog = asyncHandler(async(req, res) => {
-//     const { _id } = req.user
-//     const { bid } = req.params
-//     if(!bid) throw new Error('Missing Inputs')
-//     const blog = await Blog.findById(bid)
-//     const alreadyLiked = blog?.likes?.find(el => el.toString() === _id)
-//     if(alreadyLiked){
-//         const response = await Blog.findByIdAndUpdate(bid, { $pull: {likes: _id} }, {new: true})
-//         return res.json({
-//             success: response ? true : false,
-//             rs: response
-//         })
-//     }
-//     const isDisliked = blog?.disLikes?.find(el => el.toString() === _id)
-//     if(isDisliked) {
-//         const response = await Blog.findByIdAndUpdate(bid, { $pull: {disLikes: _id}, }, {new: true})
-//         return res.json({
-//             success: response ? true : false,
-//             rs: response
-//         })
-//     } else {
-//         const response = await Blog.findByIdAndUpdate(bid, { $push: {disLikes: _id}, }, {new: true})
-//         return res.json({
-//             success: response ? true : false,
-//             rs: response
-//         })
-//     }
-// })
-//const excludeFields = '-refreshToken -password -role -createdAt -updatedAt'
 
 const likeBlog = async (req, res) => {
   const { _id } = req.user; // ID người dùng

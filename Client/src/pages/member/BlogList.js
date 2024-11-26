@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux"; // Import useSelector to get user info
 import { Link, useSearchParams } from "react-router-dom";
-import { apiGetAllBlog } from "../../apis";
+import { apiDeleteBlog, apiGetAllBlog } from "../../apis";
 import { BlogCard, Pagination } from "../../components";
 import moment from "moment";
 import DOMPurify from "dompurify";
 import UpdateBlog from "../admin/UpdateBlog";
+import Swal from "sweetalert2";
 
 const BlogList = () => {
   const [blog, setBlog] = useState([]);
@@ -39,10 +40,57 @@ const BlogList = () => {
     fetchAllBlog(searchParams);
   }, [params, update]);
 
+  const handleDeleteBlog = async (bid) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this Post?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, keep it",
+      customClass: {
+        title: "custom-title",
+        text: "custom-text",
+        confirmButton: "custom-confirm-button",
+        cancelButton: "custom-cancel-button",
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await apiDeleteBlog(bid);
+          if (response.success) {
+            render();
+            // Swal.fire("Deleted!", "Blog Post has been deleted.", "success");
+            Swal.fire({
+              title: "Deleted!",
+              text: "Blog Post has been deleted.",
+              icon: "success",
+              confirmButtonText: "OK",
+              customClass: {
+                title: "custom-title",
+                text: "custom-text",
+                confirmButton: "custom-confirm-button",
+              },
+            })
+          } else {
+            Swal.fire("Error!", "Failed to delete Post.", "error");
+          }
+        } catch (error) {
+          console.error("An error occurred:", error);
+          Swal.fire(
+            "Error!",
+            "An error occurred while deleting Brand.",
+            "error"
+          );
+        }
+      }
+    });
+  };
+
   return (
     <div className="w-full p-6 my-4 relative">
       {editBlog && (
-        <div className="absolute inset-0 z-50 min-h-screen bg-[#F5F5FA] ">
+        <div className="absolute inset-0 z-50 h-fit bg-[#F5F5FA] ">
           <UpdateBlog
             editBlog={editBlog}
             render={render}
@@ -71,7 +119,7 @@ const BlogList = () => {
 
                 <div className="p-2 flex items-center text-main space-x-2">
                   <span className="text-[16px] font-semibold line-clamp-1">
-                    {moment(blog.createdAt).format("DD [Th]MM")}
+                    {moment(el.createdAt).format("DD [Th]MM")}
                   </span>
                   <span className="mx-1 text-gray-500">•</span>
                   <span className="text-[16px] font-semibold uppercase line-clamp-1">
@@ -116,6 +164,12 @@ const BlogList = () => {
                   className="flex items-center justify-center h-10 px-3 text-white cursor-pointer bg-[#ac8153] rounded-[5px] hover:bg-yellow-600"
                 >
                   Edit Blog
+                </span>
+                <span
+                  onClick={() => handleDeleteBlog(el._id)}
+                  className="flex items-center justify-center h-10 px-3 text-white cursor-pointer bg-[#ac5353] rounded-[5px] hover:bg-red-600"
+                >
+                  Delete
                 </span>
               </div>
             </div>

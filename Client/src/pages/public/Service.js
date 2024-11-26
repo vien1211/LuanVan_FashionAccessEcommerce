@@ -7,43 +7,43 @@ import ring from "../../assets/ring.png";
 import wave from "../../assets/wave-1.png";
 
 import { WiStars } from "react-icons/wi";
+import MiniBanner from "../../components/MiniBanner";
+import CountUp from "react-countup";
 
 const Service = () => {
   return (
-    <div className="flex flex-col shadow-xl py-4 px-8 rounded-[20px] border mb-4">
-      <div className="text-center gradient-text animate-fadeIn">
-        Vieen's Store
+    <div className="flex flex-col px-8">
+      <div className="flex w-full items-center">
+        <span className="flex-1 mx-2 border-b-2 rounded-3xl border-[#d9e7dd] animate-slideInLeft"></span>
+        <div className="text-center gradient-text animate-fadeIn">
+          Vieen's Store
+        </div>
+        <span className="flex-1 mx-2 border-b-2 border-[#d9e7dd] animate-slideInRight"></span>
       </div>
 
-      <div className="flex justify-between gap-4">
+      <div className="flex justify-between gap-8">
         {/* Text Section (60% width) */}
         <div className="w-[60%] relative flex flex-col animate-slideInLeft text-justify">
           <span className="art-word-shadow">Who We Are?</span>
-          <span>
-            <span className="gradient-text-logo mr-2">Vieen's Store</span>
-            <span className="text-[22px] font-light text-slate-600">
-              is a premier{" "}
-              <span className="font-semibold text-main">
-                Ecommerce Destination
-              </span>{" "}
-              for fashion enthusiasts, offering a wide range of{" "}
-              <span className="font-semibold text-main">
-                Fashion Accessories{" "}
-              </span>{" "}
-              tailored to your style. Whether you're looking for specific brands
-              or unique types of accessories, you'll find everything you need to{" "}
-              <span className="font-semibold text-main">Express Yourself </span>
-              . With that, you can become a{" "}
-              <span className="font-semibold text-main">
-                Professional Fashion Blogger
-              </span>{" "}
-              , sharing your fashion journey with the accessories you love!
-            </span>
+          <span className="text-[16px]">
+            Vieen's Store is a premier destination for fashion enthusiasts,
+            offering a wide range of Fashion Accessories tailored to your style.
+            Whether you're looking for specific brands or unique types of
+            accessories, you'll find everything you need to Express Yourself .
+            With that, you can become a Professional Fashion Blogger , sharing
+            your fashion journey with the accessories you love!
+          </span>
+
+          <span className="art-word-shadow mt-2">Commitment</span>
+          <span className="text-[16px] text-justify">
+            Vieen's Store committed to product quality that will not disappoint
+            our customers. Quality and price are the most important things to
+            us, to give customers the best shopping and using experience.
           </span>
         </div>
 
         {/* Image Section (40% width) */}
-        <div className="w-[40%] relative flex items-center justify-center">
+        <div className="w-[40%] relative flex items-center">
           {/* Background shadow */}
           <img
             src={shadow}
@@ -90,6 +90,56 @@ const Service = () => {
             alt="wave"
             className="object-contain w-[150px] absolute bottom-6 right-10 rotate-[16deg] opacity-35 animate-fadeIn"
           />
+        </div>
+      </div>
+
+      <div className="flex justify-center mb-4 animate-slideInUp">
+        <div className="flex flex-col px-8 py-2 border-r-2 border-[#d9e7dd] items-center">
+          <CountUp start={0} end={30} duration={1} suffix="+" 
+            className="text-[80px] text-[#dcb04a] font-semibold" 
+          />
+          <span className="text-[24px] text-[#3B5442]">All Products</span>
+        </div>
+
+        <div className="flex flex-col px-8 py-2 border-r-2 border-[#d9e7dd] items-center">
+        <CountUp start={0} end={100} duration={1} suffix="+" 
+            className="text-[80px] text-[#dcb04a] font-semibold" 
+          />
+          <span className="text-[24px] text-[#3B5442]">Customers</span>
+        </div>
+
+        <div className="flex flex-col px-8 py-2 border-r-2 border-[#d9e7dd] items-center">
+        <CountUp start={0} end={20} duration={1} suffix="+" 
+            className="text-[80px] text-[#dcb04a] font-semibold" 
+          />
+          <span className="text-[24px] text-[#3B5442]">Brands</span>
+        </div>
+
+        <div className="flex flex-col px-8 py-2 border-r-2 border-[#d9e7dd] items-center">
+        <CountUp start={0} end={10} duration={1} suffix="+" 
+            className="text-[80px] text-[#dcb04a] font-semibold" 
+          />
+          <span className="text-[24px] text-[#3B5442]">Types Items</span>
+        </div>
+
+        <div className="flex flex-col px-8 py-2 items-center">
+        <CountUp start={0} end={100} duration={1} suffix="+" 
+            className="text-[80px] text-[#dcb04a] font-semibold" 
+          />
+          <span className="text-[24px] text-[#3B5442]">Orders Per Day</span>
+        </div>
+      </div>
+
+      <div className="flex w-full flex-col mt-4 mb-4">
+        <div className="flex w-full items-center">
+          <span className="flex-1 mx-2 border-b-2 rounded-3xl border-[#d9e7dd]"></span>
+          <span className="flex text-[32px] mx-auto font-semibold text-[#3B5442]">
+            WE PROVIDE
+          </span>
+          <span className="flex-1 mx-2 border-b-2 rounded-3xl border-[#d9e7dd] animate-slideInLeft"></span>
+        </div>
+        <div className="flex justify-center">
+          <MiniBanner />
         </div>
       </div>
     </div>

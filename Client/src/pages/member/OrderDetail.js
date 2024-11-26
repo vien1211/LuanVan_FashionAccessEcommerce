@@ -6,15 +6,16 @@ import { HiOutlineArrowDownTray } from "react-icons/hi2";
 import * as XLSX from "xlsx";
 
 import { Step } from "../../components";
+import { FaCheckCircle, FaShippingFast, FaTimesCircle } from "react-icons/fa";
+import { FaDollarSign, FaHourglass, FaTruck } from "react-icons/fa6";
 
-const OrderDetail = ({ oid, setOrderDetail }) => {
-    
+const OrderDetail = ({ oid, setOrderDetail, orderPlaced }) => {
   // Function to close the detail view
   //   const handleClose = () => {
   //     setOrderDetail(null);
   //   };
 
-  window.scrollTo(0,0)
+  window.scrollTo(0, 0);
 
   const exportToExcel = () => {
     const orderData = [
@@ -27,14 +28,14 @@ const OrderDetail = ({ oid, setOrderDetail }) => {
         "Shipping Address": oid.orderBy?.address,
         "Payment Method": oid.paymentMethod,
         "Payment Status": oid.paymentStatus,
-        "Total": `${formatMoney(oid.total)} VNĐ`,
+        Total: `${formatMoney(oid.total)} VNĐ`,
       },
     ];
     const productData = oid.products.map((item) => ({
       "Product Title": item.title,
-      "Quantity": item.quantity,
-      "Color": item.color,
-      "Price": `${formatMoney(item.price)} VNĐ`,
+      Quantity: item.quantity,
+      Color: item.color,
+      Price: `${formatMoney(item.price)} VNĐ`,
     }));
 
     const workbook = XLSX.utils.book_new();
@@ -46,6 +47,7 @@ const OrderDetail = ({ oid, setOrderDetail }) => {
 
     XLSX.writeFile(workbook, `Order_${oid._id}.xlsx`);
   };
+
 
   return (
     <div className="w-full p-4 relative">
@@ -59,7 +61,7 @@ const OrderDetail = ({ oid, setOrderDetail }) => {
           onClick={exportToExcel}
           className="flex ml-auto gap-2 bg-[#6D8777] text-white text-sm font-light px-4 py-2 rounded-full shadow-md hover:bg-[#405c3e]"
         >
-          <HiOutlineArrowDownTray size={20} className=""/>
+          <HiOutlineArrowDownTray size={20} className="" />
           Export Excel
         </button>
       </div>
@@ -72,25 +74,29 @@ const OrderDetail = ({ oid, setOrderDetail }) => {
           </div>
           <div className="mb-4 mt-2">
             <span className="font-semibold">Order Date: </span>
-            <span>{moment(oid.createdAt).format("DD/MM/YYYY")}</span>
+            <span>{moment(oid.createdAt).format("DD/MM/YYYY hh:mm A")}</span>
           </div>
 
           {(oid.status === "Delivered" || oid.status === "Success") && (
             <div className="mb-4">
               <span className="font-semibold">Delivery Date: </span>
-              <span>{moment(oid.deliveryDate).format("DD/MM/YYYY")}</span>
+              <span>
+                {moment(oid.deliveryDate).format("DD/MM/YYYY hh:mm A")}
+              </span>
             </div>
           )}
         </div>
 
-        <div className=" border-b py-4 border-[#90ce90] text-[18px]">
+        <div className="h-full border-b py-4 border-[#90ce90] text-[18px]">
           <span className="font-semibold">Order Status: </span>
-          <Step currentStatus={oid.status} />
+          <Step currentStatus={oid.status} statusHistory={oid.statusHistory} orderPlaced={oid.createdAt}/>
         </div>
 
-        <div className="flex w-full mb-4 justify-between">
+       
+
+        <div className="flex w-full mb-6 mt-6 justify-between">
           {/* First Column */}
-          <div className="w-[40%] mt-4 rounded-lg bg-main text-white ml-6">
+          <div className="w-[40%] rounded-lg bg-main text-white ml-6">
             <div className="bg-gray-700 rounded-t-lg">
               <h2 className="font-bold uppercase text-white text-[18px] py-2 px-3">
                 Shipping Info
@@ -123,41 +129,46 @@ const OrderDetail = ({ oid, setOrderDetail }) => {
           </div>
 
           {/* Second Column */}
-          <div className="w-[40%] mt-4 rounded-lg bg-main text-white mr-6">
-          <div className="bg-gray-700 rounded-t-lg">
+          <div className="w-[40%] rounded-lg bg-main text-white mr-6">
+            <div className="bg-gray-700 rounded-t-lg">
               <h2 className="font-bold uppercase text-white text-[18px] py-2 px-3">
                 Payment Info
               </h2>
             </div>
 
             <div className="px-3 font-light">
-            <div className="mb-4 mt-2">
-              <span className="font-semibold">Payment Method: </span>
-              <span>{oid.paymentMethod}</span>
-            </div>
+              <div className="mb-4 mt-2">
+                <span className="font-semibold">Payment Method: </span>
+                <span className="uppercase">{oid.paymentMethod}</span>
+              </div>
 
-            <div className="mb-4">
-              <span className="font-semibold">Payment Status: </span>
-              <span>{oid.paymentStatus}</span>
-            </div>
+              <div className="mb-4">
+                <span className="font-semibold">Payment Status: </span>
+                <span className="uppercase">{oid.paymentStatus}</span>
+              </div>
 
-            <div className="mb-4">
-              <span className="font-semibold">Total: </span>
-              <span>{`${formatMoney(oid.total)} VNĐ`}</span>
-            </div>
+              <div className="mb-4">
+                <span className="font-semibold">Total: </span>
+                <span>{`${formatMoney(oid.total)} VNĐ`}</span>
+              </div>
 
-            <div className="mb-4">
-              <span className="font-semibold">Order Status: </span>
-              <span>{oid.status}</span>
+              <div className="mb-4">
+                <span className="font-semibold">Order Status: </span>
+                <span>{oid.status}</span>
+              </div>
             </div>
-          </div>
           </div>
         </div>
 
-        <h4 className="font-semibold border-t border-t-[#90ce90] py-2 text-[18px]">Order Item:</h4>
+        <h4 className="font-semibold border-t border-t-[#90ce90] py-2 text-[18px]">
+          Order Item:
+        </h4>
         <div className="flex flex-col">
           {oid.products?.map((item) => (
-            <div key={item._id} className="flex items-center mb-4 bg-white shadow-md p-4 rounded-lg">
+            <div
+              key={item._id}
+              className="flex items-center mb-4 bg-white shadow-md p-4 rounded-lg"
+            >
               <img
                 src={item.image}
                 alt={item.title}

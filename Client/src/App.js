@@ -34,15 +34,21 @@ import {
   ManageGoodsReceipt,
   ManageBlogCategory,
   CreateBlogPost,
-  ManageBlogPost
+  ManageBlogPost,
+  Profit,
+  Coupon,
+  
 } from "./pages/admin";
-import { MemberLayout, Personal, MyCart, WishList, History, Checkout, CreateBlog, BlogList } from "./pages/member";
+import { MemberLayout, Personal, MyCart, WishList, History, Checkout, CreateBlog, BlogList, UpdateEmail, EnterVerificationCode, ChangePassword, UpdatePhoneNumber } from "./pages/member";
 import path from "./ultils/path";
 import { getAllCategory } from "./store/app/AsyncAction";
 
 import { useDispatch, useSelector } from "react-redux";
-import { Cart, Modal } from "./components";
+import { Cart, Chat, ChatBotWidget, Modal } from "./components";
 import { showCart } from "./store/app/appSlice";
+import UserChat from "./components/UserChat";
+
+
 function App() {
   const dispatch = useDispatch();
   const { isShowModal, modalChildren, isShowCart } = useSelector((state) => state.app);
@@ -54,6 +60,7 @@ function App() {
 
   return (
     <div className="min-h-screen relative font-main">
+
       {isShowCart && <div onClick={() => dispatch(showCart())} className="absolute h-full inset-0 bg-black bg-opacity-70 z-50 flex justify-end">
         <Cart />
       </div>}
@@ -97,6 +104,8 @@ function App() {
           <Route path={path.MANAGE_BLOG_CATEGORY} element={<ManageBlogCategory />} />
           <Route path={path.CREATE_BLOG_POST} element={<CreateBlogPost />} />
           <Route path={path.MANAGE_BLOG_POST} element={<ManageBlogPost />} />
+          <Route path={path.PROFIT} element={<Profit />} />
+          <Route path={path.COUPON} element={<Coupon />} />
         </Route>
 
         <Route path={path.MEMBER} element={<MemberLayout />}>
@@ -105,11 +114,21 @@ function App() {
           <Route path={path.M_BLOG_LIST} element={<BlogList />} />
           <Route path={path.WISHLIST} element={<WishList />} />
           <Route path={path.HISTORY} element={<History />} />
+          <Route path={path.UPDATE_EMAIL} element={<UpdateEmail />} />
+          <Route path={path.VERIFY_UPDATE_EMAIL} element={<EnterVerificationCode />} />
+          <Route path={path.CHANGE_PASSWORD} element={<ChangePassword />} />
+          <Route path={path.UPDATE_PHONE_NUMBER} element={<UpdatePhoneNumber />} />
         </Route>
 
         <Route path={path.LOGIN} element={<Login />} />
         <Route path={path.VERIFY_REGISTER} element={<VerifyRegister />} />
+        <Route path="/user-chat" element={<UserChat />} />
+        
       </Routes>
+
+      <ChatBotWidget />
+      {/* <Chat /> */}
+      
     </div>
   );
 }

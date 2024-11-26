@@ -31,41 +31,46 @@ export const navigation = [
  
 ];
 
-export const colors = ["Black", "Blue", "Beige", "Pink", "White", "Green", "Pink Gold", "White Gold", "Gold", "Brown"];
+export const colors = ["Black", "Red", "Blue", "Yellow", "Beige", "Pink", "White", "Green", "Pink Gold", "White Gold", "Gold", "Brown", "Starlight"];
 
 export const sorts = [
   {
     id: 1,
-    value: "-sold",
-    text: "Best ",
+    value: "-createdAt",
+    text: "All Product ",
   },
   {
     id: 2,
+    value: "-sold",
+    text: "Popular ",
+  },
+  {
+    id: 3,
     value: "title",
     text: "Alphabetically, A-Z",
   },
   {
-    id: 3,
+    id: 4,
     value: "-title",
     text: "Alphabetically, Z-A",
   },
   {
-    id: 4,
+    id: 5,
     value: "price",
     text: "Price, low to high ",
   },
   {
-    id: 5,
+    id: 6,
     value: "-price",
     text: "Price, high to low ",
   },
   {
-    id: 6,
+    id: 7,
     value: "-createdAt",
     text: "Date, new to old ",
   },
   {
-    id: 7,
+    id: 8,
     value: "createdAt",
     text: "Date, old to new ",
   },
@@ -109,8 +114,12 @@ const {
   RiLoginCircleLine,
   FaTruckMonster,
   PiWarehouseFill,
+  FaWarehouse,
   TbPackageImport,
-  FaBlog
+  FaBlog,
+  FaCoins,
+  FaHouseFlag,
+  MdDiscount
 } = icons;
 
 export const adminSidebar = [
@@ -194,7 +203,7 @@ export const adminSidebar = [
     id: 8,
     type: "PARENT",
     text: "Manage Supplier",
-    icon: <FaTruckMonster size={20} />,
+    icon: <FaHouseFlag size={20} />,
     submenu: [
       {
         text: "Add Supplier",
@@ -211,7 +220,7 @@ export const adminSidebar = [
     type: "SINGLE",
     text: "Inventory",
     path: `/${path.ADMIN}/${path.INVENTORY}`,
-    icon: <PiWarehouseFill size={20} />,
+    icon: <FaWarehouse size={20} />,
   },
   {
     id: 10,
@@ -233,7 +242,7 @@ export const adminSidebar = [
     id: 11,
     type: "PARENT",
     text: "Blog",
-    icon: <TbPackageImport size={20} />,
+    icon: <FaBlog size={20} />,
     submenu: [
       {
         text: "Manage Blog Category",
@@ -249,6 +258,20 @@ export const adminSidebar = [
       },
     ],
   },
+  {
+    id: 12,
+    type: "SINGLE",
+    text: "Revenue & Profit",
+    path: `/${path.ADMIN}/${path.PROFIT}`,
+    icon: <FaCoins size={20} />,
+  },
+  {
+    id: 13,
+    type: "SINGLE",
+    text: "Coupon Discount",
+    path: `/${path.ADMIN}/${path.COUPON}`,
+    icon: <MdDiscount size={20} />,
+  }
 ];
 
 export const memberSidebar = [
@@ -329,16 +352,12 @@ export const statusOrder = [
     value: "Awaiting Confirmation",
   },
   {
-    label: "Processing",
-    value: "Processing",
-  },
-  {
-    label: "On The Way",
-    value: "On The Way",
+    label: "Confirmed",
+    value: "Confirmed",
   },
   {
     label: "Shipped",
-    value: "Shipped",
+    value: "Shipped Out",
   },
   {
     label: "On Delivery",

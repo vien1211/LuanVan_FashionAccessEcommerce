@@ -207,6 +207,8 @@ const Stock = () => {
     fetchStock(queries);
   }, [queriesDebounce, params]);
 
+
+
   const handleExportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
       inventory.map((item) => ({

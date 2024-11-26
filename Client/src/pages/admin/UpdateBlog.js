@@ -361,19 +361,29 @@ const UpdateBlog = ({ editBlog, render, setEditBlog }) => {
 
       if (response.success) {
         Swal.fire({
-          title: "Cập nhật thành công",
-          text: "Blog đã được cập nhật thành công!",
+          title: "Updated",
+          text: "Update This Post Successfully!",
           icon: "success",
           confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+          },
         });
         render();
         setEditBlog(null);
       } else {
         Swal.fire({
-          title: "Lỗi",
-          text: "Cập nhật blog thất bại!",
+          title: "Oops!",
+          text: "Fail To Update This Post!",
           icon: "error",
           confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+          },
         });
       }
     }
@@ -424,7 +434,7 @@ const UpdateBlog = ({ editBlog, render, setEditBlog }) => {
               <img
                 src={preview.image[0]} // Chỉ lấy ảnh đầu tiên (nếu có)
                 alt="Preview"
-                className="w-[950px] h-[380px] rounded-lg object-cover mx-auto"
+                className="w-[950px] h-[380px] border shadow-lg rounded-xl object-cover mx-auto"
               />
             ) : (
               <p>No image available</p>
@@ -450,7 +460,7 @@ const UpdateBlog = ({ editBlog, render, setEditBlog }) => {
           <MarkDownEditor
             name="description"
             changeValue={changeValue}
-            label="Description"
+            label="Blog Content"
             invalidField={invalidField}
             setInvalidField={setInvalidField}
             value={payload.description}

@@ -11,10 +11,12 @@ import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import { apiDeleteBlog, apiGetAllBlog, apiUpdateBlog } from "../../apis";
-import { useSearchParams } from "react-router-dom";
+import { createSearchParams, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import useDebounce from "../../hooks/useDebounce";
 import moment from "moment";
 import UpdateBlog from "./UpdateBlog";
+import icons from "../../ultils/icons";
+const { CiEdit, CiEraser, CiUndo } = icons;
 
 const ManageBlogPost = () => {
   const {
@@ -33,6 +35,8 @@ const ManageBlogPost = () => {
   const [blogs, setBlogs] = useState(null);
   const [params] = useSearchParams();
   const queryDebounce = useDebounce(q, 800);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const fetchAllBlog = async (params) => {
     const response = await apiGetAllBlog({
@@ -97,6 +101,17 @@ const ManageBlogPost = () => {
     [q]
   );
 
+  const handleSearch = (value) => {
+    setQ(value);
+    navigate({
+      pathname: location.pathname,
+      search: createSearchParams({
+        ...Object.fromEntries([...params]),
+        q: value || "", // Thêm từ khóa tìm kiếm
+      }).toString(),
+    });
+  };
+
   const handleDeleteBlog = async (bid) => {
     Swal.fire({
       title: "Are you sure?",
@@ -105,13 +120,28 @@ const ManageBlogPost = () => {
       showCancelButton: true,
       confirmButtonText: "Yes, delete it!",
       cancelButtonText: "No, keep it",
+      customClass: {
+        title: "custom-title",
+        text: "custom-text",
+        confirmButton: "custom-confirm-button",
+      },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           const response = await apiDeleteBlog(bid);
           if (response.success) {
             render();
-            Swal.fire("Deleted!", "Blog Post has been deleted.", "success");
+            Swal.fire({
+              title: "Deleted!",
+              text: "Blog Post has been deleted.",
+              icon: "success",
+              customClass: {
+                title: "custom-title",
+                text: "custom-text",
+                confirmButton: "custom-confirm-button",
+              },
+            });
+            
           } else {
             Swal.fire("Error!", "Failed to delete Post.", "error");
           }
@@ -147,7 +177,8 @@ const ManageBlogPost = () => {
           <InputField
             nameKey={"Search..."}
             value={q}
-            setValue={setValue}
+            // setValue={setValue}
+            setValue={handleSearch}
             style={"w-[350px] shadow-md"}
           />
         </div>
@@ -159,7 +190,7 @@ const ManageBlogPost = () => {
               <th className="px-2 py-2">Thumbnail</th>
               <th className="px-2 py-2">Title</th>
               <th className="px-2 py-2">Category</th>
-           
+
               <th className="px-2 py-2">Created At</th>
               <th className="px-2 py-2">Author</th>
               <th className="px-2 py-2">View</th>
@@ -189,15 +220,14 @@ const ManageBlogPost = () => {
                 <td className="py-2 px-2">
                   <img
                     src={el.image}
-                    alt={el.title}
+                    alt={el?.title}
                     className="w-[70px] h-[60px] object-cover"
                   />
                 </td>
 
-                <td className="py-2 px-2">{el.title}</td>
+                <td className="py-2 px-2">{el?.title}</td>
 
-                <td className="py-2 px-2">{el.category.title}</td>
-
+                <td className="py-2 px-2">{el.category?.title}</td>
 
                 <td className="py-2 px-2">
                   {moment(el.createdAt).format("DD/MM/YYYY hh:mm A")}
@@ -205,6 +235,7 @@ const ManageBlogPost = () => {
 
                 <td className="py-2 px-2">
                   {`${el.author?.firstname} ${el.author?.lastname}`}
+                  
                 </td>
 
                 <td className="py-2 px-2">{el.numberView}</td>
@@ -214,7 +245,7 @@ const ManageBlogPost = () => {
                 <td className="py-2 px-2">{el.dislikesCount}</td>
 
                 <td className="py-2 px-2">{el?.comment.length || 0}</td>
-                <td className="py-2 px-2 flex gap-2">
+                <td className="py-4 px-2 flex gap-2">
                   {editBlog?._id === el._id ? (
                     <span
                       onClick={() => setEditBlog(null)}
@@ -225,16 +256,16 @@ const ManageBlogPost = () => {
                   ) : (
                     <span
                       onClick={() => setEditBlog(el)}
-                      className="px-4 py-2 text-white cursor-pointer bg-main rounded-[5px] hover:bg-[#79a076] transition duration-150"
+                      className="px-2 py-2 text-white cursor-pointer bg-main rounded-full hover:bg-[#79a076] transition duration-150"
                     >
-                      Edit
+                      <CiEdit size={20} />
                     </span>
                   )}
                   <span
                     onClick={() => handleDeleteBlog(el._id)}
-                    className="px-4 py-2 text-white cursor-pointer bg-red-600 rounded-[5px] hover:bg-red-700 transition duration-150"
+                    className="px-2 py-2 text-white cursor-pointer bg-red-600 rounded-full hover:bg-red-700 transition duration-150"
                   >
-                    Delete
+                    <CiEraser size={20} />
                   </span>
                 </td>
               </tr>

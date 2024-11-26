@@ -34,7 +34,7 @@ const NewArrival = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await apiGetProducts({ sort: "-createdAt", limit: "10" });
+      const response = await apiGetProducts({ sort: "-createdAt", sold: "0", limit: "10" });
       if (response?.success) setBestSellers(response.productData);
     } catch (error) {
       console.error("Failed to fetch products:", error);
@@ -50,13 +50,13 @@ const NewArrival = () => {
       
       <div className="flex p-4 rounded-t justify-center items-center">
         <div className="flex-1 border-b border-gray-300 mx-2"></div>
-        <div className="font-semibold uppercase text-white font-playfair text-[32px] text-center">
+        <div className="flex font-semibold uppercase text-white font-playfair text-[32px] text-center">
           new arrival products
         </div>
-        {/* <div className="flex-1 border-b border-gray-300 mx-2"></div> */}
+        <div className="flex-1 border-b border-gray-300 mx-2"></div>
       </div>
       
-      <div className="font-extralight text-[20px] text-right text-white pb-2 mr-3">
+      <div className="flex justify-center font-extralight text-[20px] text-right text-white pb-2 ">
         <span >New products, bringing new styles to you, promise to be your next trust in us.</span>
        
       </div>

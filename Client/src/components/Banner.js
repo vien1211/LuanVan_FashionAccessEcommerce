@@ -65,6 +65,7 @@ import ItemBanner from "../assets/Item Banner.png";
 import Typewriter from "typewriter-effect";
 import b02 from "../assets/b02.png";
 import w01 from "../assets/w01.png";
+import shadow from "../assets/Shadow.png";
 import w02 from "../assets/w02.png";
 import { BsStars } from "react-icons/bs";
 import { WiStars } from "react-icons/wi";
@@ -122,7 +123,7 @@ const Banner = () => {
             />
           </div>
 
-          <button className="text-[24px] w-[220px] h-[50px] font-bold px-4 py-1 mt-8 bg-[#273526] text-white border-2 border-[#273526] transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#273526] animate-slideInUp">
+          <button className="text-[24px] w-[220px] h-[50px] rounded-full font-bold px-4 py-1 mt-8 bg-[#273526] text-white border-2 border-[#273526] transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#273526] animate-slideInUp">
             <Link to="/products" className="flex items-center">
               <FaArrowRightLong className="text-[20px] mr-3 ml-4" />
               <span className="text-[20px]">SHOP NOW</span>
@@ -145,11 +146,8 @@ const Banner = () => {
                 "translateX(10%) rotate(0deg) scale(1)")
             }
           />
-          {/* <img
-            src={b02}
-            alt="Banner"
-            className="object-contain h-[170px] w-[170px] opacity-5 absolute top-0 left-0 z-0" // Đặt b02 ở dưới cùng
-          /> */}
+          
+          
           <span className="absolute opacity-25 bottom-10 right-8 text-white rotate-[4deg]">
               <BsStars size={68} />
             </span>

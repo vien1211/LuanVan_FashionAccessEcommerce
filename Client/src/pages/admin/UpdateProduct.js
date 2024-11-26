@@ -111,7 +111,6 @@ const UpdateProduct = ({ editProduct, render, setEditProduct }) => {
       console.log(finalPayload);
       const formData = new FormData();
       for (let i of Object.entries(finalPayload)) formData.append(i[0], i[1]);
-      //   if (finalPayload.thumb) formData.append("thumb", finalPayload.thumb[0]);
       
       if (finalPayload.images) {
         const images =
@@ -131,15 +130,25 @@ const UpdateProduct = ({ editProduct, render, setEditProduct }) => {
           text: "Update Product Successfully!",
           icon: "success",
           confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+          },
         });
         render();
         setEditProduct(null);
       } else {
         Swal.fire({
           title: "Oops!",
-          text: "Failed to Update Product!",
+          text: "Failed to Update Variant Product!",
           icon: "error",
           confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+          },
         });
       }
     }
@@ -201,26 +210,26 @@ const UpdateProduct = ({ editProduct, render, setEditProduct }) => {
               register={register}
               errors={errors}
               id="price"
-              validate={{
-                required: "Require",
-              }}
+              // validate={{
+              //   required: "Require",
+              // }}
               fullWidth={true}
               style="flex-auto rounded-md"
               placeholder="Price Product"
               type="number"
             />
 
-            <InputForm
+            {/* <InputForm
               label="Quantity"
               register={register}
               errors={errors}
-              id="quantity"
+              id="stockInfo"
               readOnly={true}
               fullWidth={true}
               style="flex-auto rounded-md opacity-70"
               placeholder="Quantity"
               type="number"
-            />
+            /> */}
 
             <InputForm
               label="Color"
@@ -318,7 +327,7 @@ const UpdateProduct = ({ editProduct, render, setEditProduct }) => {
                   <img
                     src={el}
                     alt="product"
-                    className="w-[200px] object-contain"
+                    className="w-[180px] object-contain"
                   />
                   {hoverImg === index && ( // Only show overlay on the image being hovered
                     <div className="absolute inset-0 animate-slide-fwd-center bg-[#1c1c1c42] flex justify-center items-center">

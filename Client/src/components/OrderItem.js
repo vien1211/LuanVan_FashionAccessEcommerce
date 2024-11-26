@@ -74,21 +74,25 @@ const OrderItem = ({ el, defaultQuantity = 1 }) => {
     [quantity]
   );
 
+  
+
   useEffect(() => {
     dispatch(updateCart({ pid: el.product?._id, quantity, color: el.color }));
   }, [quantity]);
+
+
   return (
     <div className="w-full rounded-[8px] mx-auto border font-bold my-2 py-2 grid grid-cols-10">
       <div className="col-span-5 w-full">
-        <div className="flex gap-4 py-2 px-4">
+        <div className="flex gap-4 px-3 py-1">
           <img
             src={el?.image}
             alt="product"
-            className="w-28 h-28 object-cover rounded-sm"
+            className="w-[85px] h-[85px] object-cover rounded-sm"
           />
           <div className="flex flex-col items-start gap-1">
-            <span className="font-bold text-[18px] text-main">{el.title}</span>
-            <span className="text-[12px] font-semibold">{el.color}</span>
+            <span className="font-semibold text-[14px] text-main">{el.title}</span>
+            <span className="text-[12px] font-light">{el.color}</span>
           </div>
         </div>
       </div>
@@ -103,7 +107,7 @@ const OrderItem = ({ el, defaultQuantity = 1 }) => {
         </div>
       </div>
       <div className="col-span-2 w-full h-full flex items-center text-center">
-        <span className="text-lg font-medium">
+        <span className="text-[14px] font-normal">
           {formatMoney(el.price * quantity) + " VNĐ"}
         </span>
       </div>

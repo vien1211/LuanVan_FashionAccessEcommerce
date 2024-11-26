@@ -272,7 +272,7 @@ const ImportGoods = () => {
             />
 
             <InputForm
-              label="Import Price"
+              label="Import Unit Price"
               register={register}
               errors={errors}
               id="price"
@@ -310,14 +310,14 @@ const ImportGoods = () => {
                     Quantity
                   </th>
                   <th className="border border-gray-300 px-4 py-2 font-semibold">
-                    Price
+                    Unit Price
                   </th>
                   <th className="border border-gray-300 px-4 py-2 font-semibold">
                     Total
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white">
                 {productsInReceipt.map((item, index) => {
                   const product = products.find((p) => p._id === item.product);
 

@@ -22,6 +22,7 @@ import moment from "moment";
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa6";
 import avt from "../../assets/avtDefault.avif";
 import { RelatedBlog } from "../../components";
+import { VscFoldDown, VscFoldUp } from "react-icons/vsc";
 
 const BlogDetail = () => {
   const navigate = useNavigate();
@@ -35,6 +36,22 @@ const BlogDetail = () => {
   const [replyCommentId, setReplyCommentId] = useState(null);
   const [isReplying, setIsReplying] = useState(false);
   const [comment, setComment] = useState("");
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const maxChars = 800;
+
+  // Function to toggle the expanded state
+  const toggleDescription = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  // Get the sanitized description
+  const sanitizedDescription = DOMPurify.sanitize(blog?.description);
+
+  // Conditionally render the description based on the expanded state
+  const descriptionToShow = isExpanded
+    ? sanitizedDescription
+    : sanitizedDescription.slice(0, maxChars) + "...";
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -63,91 +80,10 @@ const BlogDetail = () => {
     };
 
     fetchBlog();
-    window.scrollTo(0, 0);
+    //window.scrollTo(0, 0);
   }, [bid, comment, replyContent]);
 
-  // const handleSelectOption = async (e, flag) => {
-  //   e.stopPropagation();
-
-  //   if (!current)
-  //     return Swal.fire({
-  //       title: "Almost...",
-  //       text: "Please Log In To Do This Action",
-  //       icon: "info",
-  //       confirmButtonText: "Go Log In",
-  //       showCancelButton: true,
-  //       cancelButtonText: "Not now!",
-  //       customClass: {
-  //         title: "custom-title",
-  //         text: "custom-text",
-  //         confirmButton: "custom-confirm-button",
-  //         cancelButton: "custom-cancel-button",
-  //       },
-  //     }).then((rs) => {
-  //       if (rs.isConfirmed)
-  //         navigate({
-  //           pathname: `/${path.LOGIN}`,
-  //           search: createSearchParams({
-  //             redirect: location.pathname,
-  //           }).toString(),
-  //         });
-  //     });
-
-  //   try {
-  //     let response;
-  //     let actionText;
-
-  //     // Cập nhật trạng thái "like" hoặc "dislike"
-  //     if (flag === "LIKE") {
-  //       response = await apiUpdateLike(bid);
-  //       actionText = response.success
-  //         ? isLiked
-  //           ? "Unliked!"
-  //           : "Liked!"
-  //         : null;
-  //     } else if (flag === "DISLIKE") {
-  //       response = await apiUpdateDislike(bid);
-  //       actionText = response.success
-  //         ? isDisliked
-  //           ? "Undisliked!"
-  //           : "Disliked!"
-  //         : null;
-  //     }
-
-  //     if (response.success) {
-  //       dispatch(getCurrentUser());
-  //       Swal.fire({
-  //         title: actionText,
-  //         text: response.success
-  //           ? `You've ${actionText.toLowerCase()} the blog!`
-  //           : "",
-  //         icon: "success",
-  //         customClass: {
-  //           title: "custom-title",
-  //           text: "custom-text",
-  //           confirmButton: "custom-confirm-button",
-  //           cancelButton: "custom-cancel-button",
-  //         },
-  //       }).then(() => {
-  //         window.location.reload();
-  //       });
-  //     } else {
-  //       Swal.fire({
-  //         title: "Oops!",
-  //         text: `Failed to ${flag === "LIKE" ? "like" : "dislike"} the blog!`,
-  //         icon: "error",
-  //         customClass: {
-  //           title: "custom-title",
-  //           text: "custom-text",
-  //           confirmButton: "custom-confirm-button",
-  //           cancelButton: "custom-cancel-button",
-  //         },
-  //       })
-  //     }
-  //   } catch (error) {
-  //     console.error(`Error updating ${flag.toLowerCase()} status:`, error);
-  //   }
-  // };
+ 
 
   const handleSelectOption = async (e, flag) => {
     e.stopPropagation();
@@ -156,7 +92,7 @@ const BlogDetail = () => {
       return Swal.fire({
         icon: 'error',
         title: 'Account Blocked!',
-        text: 'Your account is blocked, and you cannot comment at this time.',
+        text: 'Your account is blocked, and you cannot do this action at this time.',
         confirmButtonText: 'OK',
         customClass: {
           title: "custom-title",
@@ -402,9 +338,6 @@ const BlogDetail = () => {
     }
   };
 
-
-  
-
   if (loading) {
     return <div className="text-center py-4">Loading...</div>;
   }
@@ -415,6 +348,16 @@ const BlogDetail = () => {
 
   const isLiked = current?.likes?.some((i) => i._id === bid);
   const isDisliked = current?.dislikes?.some((i) => i._id === bid);
+
+  const handleReplyClick = (commentId) => {
+    setReplyCommentId(commentId);
+    setReplyContent("");
+  };
+
+  const handleCancelClick = () => {
+    setReplyCommentId(null);
+    setReplyContent("");
+  };
 
   return (
     <div>
@@ -483,12 +426,33 @@ const BlogDetail = () => {
             </div>
           </div>
         </div>
-        <div
+        {/* <div
           className="mt-4 text-gray-700"
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(blog?.description),
           }}
-        />
+        /> */}
+        <div className="mt-4 text-gray-700">
+      <div
+        className="flex flex-col"
+        dangerouslySetInnerHTML={{ __html: descriptionToShow }}
+      />
+      
+      {/* Toggle button */}
+      <button
+        onClick={toggleDescription}
+        className="flex flex-col items-center mx-auto mt-2 text-slate-400 hover:text-main"
+      >
+        <span>{isExpanded ? "Collapse" : "See More"}</span>
+        <div className="">
+          {isExpanded ? (
+            <VscFoldUp size={16} />
+          ) : (
+            <VscFoldDown size={16} />
+          )}
+        </div>
+      </button>
+    </div>
         <div className="flex flex-col items-end py-4">
           <span className="text-md text-gray-600 bg-[#e2f1e4] py-1 px-3 rounded-full">
             {" "}
@@ -517,10 +481,11 @@ const BlogDetail = () => {
 
       <div className="max-w-6xl mx-auto px-10 border rounded-lg shadow-lg mb-8">
       <div className="mt-6">
-        <h3 className="text-[24px] text-[rgb(61,87,68)] font-semibold my-2">
-          Comment
+        <h3 className="flex items-center text-[rgb(61,87,68)] font-semibold my-2">
+          <span className="text-[24px]">Comment</span>
+          <span className="px-2 text-[16px]">( {blog?.comment.length || 0} )</span>
         </h3>
-
+        
         <textarea
           rows="3"
           className="border rounded p-2 w-full"
@@ -537,7 +502,6 @@ const BlogDetail = () => {
       </div>
 
       <div className="mt-4 mb-6">
-        
         {blog?.comment.map((comment) => (
           <div key={comment?._id} className="pb-2">
             <div className="flex justify-between items-center gap-4 bg-[#eef3f0] rounded-lg">
@@ -561,29 +525,21 @@ const BlogDetail = () => {
                 </div>
               </div>
 
-              {!isReplying ? (
-                <button
-                  className="text-blue-500 hover:text-blue-700 transition-colors mr-4"
-                  onClick={() => {
-                    setReplyCommentId(comment?._id);
-                    setReplyContent("");
-                    setIsReplying(true);
-                  }}
-                >
-                  Reply
-                </button>
-              ) : (
-                <button
-                  className="text-red-600 hover:text-red-700 transition-colors mr-4"
-                  onClick={() => {
-                    setReplyCommentId(null);
-                    setReplyContent("");
-                    setIsReplying(false);
-                  }}
-                >
-                  Cancel
-                </button>
-              )}
+              {replyCommentId === comment?._id ? (
+              <button
+                className="text-red-600 hover:text-red-700 transition-colors mr-4"
+                onClick={handleCancelClick}
+              >
+                Cancel
+              </button>
+            ) : (
+              <button
+                className="text-blue-500 hover:text-blue-700 transition-colors mr-4"
+                onClick={() => handleReplyClick(comment?._id)}
+              >
+                Reply
+              </button>
+            )}
             </div>
 
             <div className="ml-8 mt-3">

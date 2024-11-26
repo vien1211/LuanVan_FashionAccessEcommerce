@@ -1,4 +1,3 @@
-
 import React, { memo, useState, useEffect, useCallback } from "react";
 import { apiGetOrderByUser, apiGetProduct, apiRatings } from "../apis";
 import { renderStar } from "../ultils/helper";
@@ -17,18 +16,17 @@ const CustomerReview = ({ nameProduct }) => {
   const { pid } = useParams();
   const [isWrite, setIsWrite] = useState(false);
   const [reviews, setReviews] = useState([]);
-  const { current} = useSelector((state) => state.user);
-  const { isLoggedIn} = useSelector((state) => state.user);
+  const { current } = useSelector((state) => state.user);
+  const { isLoggedIn } = useSelector((state) => state.user);
   const [hasPurchased, setHasPurchased] = useState(false);
-  
 
   const handleSubmitReviewOption = async (star, comment) => {
     if (current?.isBlocked) {
       return Swal.fire({
-        icon: 'error',
-        title: 'Account Blocked!',
-        text: 'Your account is blocked, and you cannot review at this time.',
-        confirmButtonText: 'OK',
+        icon: "error",
+        title: "Account Blocked!",
+        text: "Your account is blocked, and you cannot review at this time.",
+        confirmButtonText: "OK",
         customClass: {
           title: "custom-title",
           text: "custom-text",
@@ -42,7 +40,12 @@ const CustomerReview = ({ nameProduct }) => {
       return;
     }
     try {
-      const response = await apiRatings({ star, comment, pid, createdAt: Date.now() });
+      const response = await apiRatings({
+        star,
+        comment,
+        pid,
+        createdAt: Date.now(),
+      });
       console.log("API Response:", response);
       console.log("Success Status:", response.success);
 
@@ -64,7 +67,7 @@ const CustomerReview = ({ nameProduct }) => {
             confirmButton: "custom-confirm-button",
             cancelButton: "custom-cancel-button",
           },
-        })
+        });
       } else {
         alert("Failed to submit review. Please try again.");
       }
@@ -74,17 +77,14 @@ const CustomerReview = ({ nameProduct }) => {
   };
 
   // Toggle review form
- 
 
- 
-  
   const handleWriteReview = useCallback(() => {
     if (current?.isBlocked) {
       return Swal.fire({
-        icon: 'error',
-        title: 'Account Blocked!',
-        text: 'Your account is blocked, and you cannot review at this time.',
-        confirmButtonText: 'OK',
+        icon: "error",
+        title: "Account Blocked!",
+        text: "Your account is blocked, and you cannot review at this time.",
+        confirmButtonText: "OK",
         customClass: {
           title: "custom-title",
           text: "custom-text",
@@ -100,9 +100,9 @@ const CustomerReview = ({ nameProduct }) => {
     const fetchProductData = async () => {
       try {
         const response = await apiGetProduct(pid);
-        if (response.success){
-           setProduct(response.productData)
-           await checkUserPurchase(response.productData);
+        if (response.success) {
+          setProduct(response.productData);
+          await checkUserPurchase(response.productData);
         }
       } catch (error) {
         console.error("Error fetching product data:", error);
@@ -113,9 +113,11 @@ const CustomerReview = ({ nameProduct }) => {
       try {
         const ordersResponse = await apiGetOrderByUser(); // Fetch user's orders
         if (ordersResponse.success) {
-          const deliveredOrders = ordersResponse.orders.filter((order) =>
-            order.products.some((p) => p.product.toString() === productData._id) &&
-           order.status === "Success"
+          const deliveredOrders = ordersResponse.orders.filter(
+            (order) =>
+              order.products.some(
+                (p) => p.product.toString() === productData._id
+              ) && order.status === "Success"
           );
           setHasPurchased(deliveredOrders.length > 0); // Check if there are any delivered orders containing the product
         }
@@ -136,10 +138,10 @@ const CustomerReview = ({ nameProduct }) => {
     return (
       <div>
         <h3 className="text-[22px] font-semibold capitalize">
-          Khách hàng đánh giá
+          Customer Review
         </h3>
         <div className="text-[16px] mt-2">
-          <span>Tổng quan</span>
+          <span>Summary</span>
           <div className="flex items-center mt-2">
             <span className="flex items-center pr-4 text-[48px] font-semibold text-main">
               {product.totalRatings || 0}
@@ -189,7 +191,7 @@ const CustomerReview = ({ nameProduct }) => {
   //     src={NoComment}
   //     className="w-[400px] h-auto mx-auto"
   //     alt="No comment"
-  //   />; 
+  //   />;
   //   }
   //   return product?.ratings?.map((review, index) => (
   //     <div key={index} className="p-4 border-b">
@@ -197,7 +199,7 @@ const CustomerReview = ({ nameProduct }) => {
   //         {/* Avatar */}
   //         <div className="p-2 flex-none">
   //           <img
-  //             src={review.postedBy?.avatar || avt} 
+  //             src={review.postedBy?.avatar || avt}
   //             alt="avatar"
   //             className="w-[60px] h-[60px] object-cover rounded-full"
   //           />
@@ -230,14 +232,17 @@ const CustomerReview = ({ nameProduct }) => {
   // };
 
   const [currentPage, setCurrentPage] = useState(1);
-  const reviewsPerPage = 5; 
+  const reviewsPerPage = 5;
 
   const indexOfLastReview = currentPage * reviewsPerPage;
   const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
-  const currentReviews = product?.ratings?.slice(indexOfFirstReview, indexOfLastReview) || [];
+  const currentReviews =
+    product?.ratings?.slice(indexOfFirstReview, indexOfLastReview) || [];
 
   // Calculate total number of pages
-  const totalPages = Math.ceil((product?.ratings?.length || 0) / reviewsPerPage);
+  const totalPages = Math.ceil(
+    (product?.ratings?.length || 0) / reviewsPerPage
+  );
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -256,7 +261,7 @@ const CustomerReview = ({ nameProduct }) => {
 
     return currentReviews.map((review, index) => (
       <div key={index} className="p-4 border-b">
-        <div className="flex items-center">
+        <div className="flex items-start gap-4">
           {/* Avatar */}
           <div className="p-2 flex-none">
             <img
@@ -265,36 +270,42 @@ const CustomerReview = ({ nameProduct }) => {
               className="w-[60px] h-[60px] object-cover rounded-full"
             />
           </div>
-          {/* Name and Date */}
-          <div className="flex flex-col flex-auto">
-            <div className="flex flex-col">
-              <h3 className="flex font-semibold">{`${review.postedBy?.lastname} ${review.postedBy?.firstname}` || "Anonymous"}</h3>
-              <span className="flex text-sm text-gray-500">
-                {moment(review.createdAt).fromNow()}
-              </span>
+
+          {/* Review Content (Name, Date, Rating, Comment) */}
+          <div className="flex-1">
+            {/* Name and Date */}
+            <div className="flex justify-between gap-8">
+              <div className="flex flex-col mb-2">
+                <h3 className="font-semibold">
+                  {`${review.postedBy?.lastname} ${review.postedBy?.firstname}` ||
+                    "Anonymous"}
+                </h3>
+                <span className="text-sm text-gray-500">
+                  {moment(review.createdAt).fromNow()}
+                </span>
+              </div>
+
+              {/* Star Rating */}
+              <div className="flex flex-col gap-2 mb-2">
+                <span className="flex items-center mx-auto gap-1 text-main">
+                  {renderStar(review.star)?.map((el, i) => (
+                    <span key={i}>{el}</span>
+                  ))}
+                </span>
+                <span className="text-sm text-gray-500">
+                  {moment(review.createdAt).format(
+                    "hh:mm A [Th]MM DD, YYYY"
+                  )}
+                </span>
+              </div>
             </div>
-          </div>
-          {/* Star Rating */}
-          <div className="flex flex-col gap-2">
-            <span className="flex items-center gap-1 text-main">
-              {renderStar(review.star)?.map((el, i) => (
-                <span key={i}>{el}</span>
-              ))}
-            </span>
-            <span className="ml-4 text-sm text-gray-500">
-              {new Date(review.createdAt).toLocaleDateString()}
-            </span>
+            {/* Comment */}
+            <div className=" text-gray-700">{review.comment}</div>
           </div>
         </div>
-        {/* Comment */}
-        <p className="mt-2 text-gray-700">{review.comment}</p>
       </div>
     ));
   };
-
- 
-
-
 
   return (
     <div className="relative flex w-full h-[600px] bg-[#F5F5FA] shadow-md p-4 rounded-lg">
@@ -323,12 +334,12 @@ const CustomerReview = ({ nameProduct }) => {
         <div className="w-3/5 flex flex-col gap-4">
           {renderReviews()}
           <div className="flex justify-end my-4">
-        <Pagination
-          totalCount={totalPages}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
-      </div>
+            <Pagination
+              totalCount={totalPages}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </div>
       </div>
     </div>

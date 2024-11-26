@@ -28,7 +28,8 @@ var productSchema = new mongoose.Schema({
     // },
     price:{
         type:Number,
-        required:true
+        default: 0
+        // required:true
     },
     // category:{
     //     type:mongoose.Types.ObjectId,
@@ -72,7 +73,7 @@ var productSchema = new mongoose.Schema({
             color: String,
             price: Number,
             images: Array,
-            quantity: Number,
+            // quantity: Number,
             sold: Number,
             title: String,
             sku: String

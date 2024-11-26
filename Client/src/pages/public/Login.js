@@ -2,7 +2,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import path from "../../ultils/path";
 import { InputField, Button, Loading } from "../../components";
-import { apiRegister, apiLogin, apiForgotPassword, apiGoogleLogin } from "../../apis/user";
+import {
+  apiRegister,
+  apiLogin,
+  apiForgotPassword,
+  apiGoogleLogin,
+} from "../../apis/user";
 import Swal from "sweetalert2";
 import { login } from "../../store/user/userSlice";
 import { useDispatch } from "react-redux";
@@ -31,14 +36,15 @@ const Login = () => {
     firstname: "",
     lastname: "",
     mobile: "",
+    confirmPassword: "",
   });
 
   const [invalidFields, setInvalidFields] = useState([]);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [searchParams] = useSearchParams();
-  
 
   const resetPayload = () => {
     setPayLoad({
@@ -47,9 +53,75 @@ const Login = () => {
       firstname: "",
       lastname: "",
       mobile: "",
+      confirmPassword: "",
     });
   };
+  // const handleChange = useCallback((nameKey, value) => {
+  //   setInvalidFields((prev) => prev.filter((field) => field.nameKey !== nameKey));
+
+  // // Check for mobile validation if the field is "mobile"
+  // if (nameKey === "mobile") {
+  //   const mobileRegex = /^\d{10,15}$/; // Allow only numbers with length between 10 and 15
+  //   if (!mobileRegex.test(value)) {
+  //     setInvalidFields((prev) => [
+  //       ...prev,
+  //       { nameKey, message: "Invalid phone number format" },
+  //     ]);
+  //   }
+  // }
+
+  //   setPayLoad((prev) => ({
+  //     ...prev,
+  //     [nameKey]: value,
+  //   }));
+  // }, []);
   const handleChange = useCallback((nameKey, value) => {
+    setInvalidFields((prev) =>
+      prev.filter((field) => field.nameKey !== nameKey)
+    );
+
+    if (nameKey === "mobile") {
+      const mobileRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/gm;
+      if (!mobileRegex.test(value)) {
+        setInvalidFields((prev) => [
+          ...prev,
+          { nameKey, message: "Phone number must contain 10-15 digits." },
+        ]);
+      }
+    }
+
+    if (nameKey === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        setInvalidFields((prev) => [
+          ...prev,
+          { nameKey, message: "Invalid email format." },
+        ]);
+      }
+    }
+
+    if (nameKey === "password") {
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+      if (!passwordRegex.test(value)) {
+        setInvalidFields((prev) => [
+          ...prev,
+          {
+            nameKey,
+            message:
+              "Password must be at least 6 characters and include uppercase, lowercase, number, and special character.",
+          },
+        ]);
+      }
+    }
+
+    if (nameKey === "confirmPassword" && value !== payload.password) {
+      setInvalidFields((prev) => [
+        ...prev,
+        { nameKey, message: "Passwords do not match." },
+      ]);
+    }
+
     setPayLoad((prev) => ({
       ...prev,
       [nameKey]: value,
@@ -105,11 +177,20 @@ const Login = () => {
   }, [isSignUp]);
 
   const handleSubmit = useCallback(async () => {
-    const { firstname, lastname, mobile, ...data } = payload;
+    const { firstname, lastname, mobile, confirmPassword, ...data } = payload;
 
     const invalids = isSignUp
       ? validate(payload, setInvalidFields)
       : validate(data, setInvalidFields);
+
+    if (isSignUp && payload.password !== payload.confirmPassword) {
+      setInvalidFields((prev) => [
+        ...prev,
+        { nameKey: "confirmPassword", message: "Passwords do not match." },
+      ]);
+      return;
+    }
+
     if (invalids === 0) {
       try {
         if (isSignUp) {
@@ -311,6 +392,7 @@ const Login = () => {
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
               fullWidth
+              
             />
           )}
 
@@ -334,29 +416,57 @@ const Login = () => {
             </button>
           </div>
 
+          {isSignUp && (
+            <>
+              <div className="w-full relative">
+                <InputField
+                  value={payload.confirmPassword}
+                  setValue={(value) => handleChange("confirmPassword", value)}
+                  nameKey="confirmPassword"
+                  placeholder="Confirm Password"
+                  type={confirmPasswordVisible ? "text" : "password"}
+                  invalidFields={invalidFields}
+                  setInvalidFields={setInvalidFields}
+                  fullWidth
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10 text-main"
+                  onClick={() =>
+                    setConfirmPasswordVisible(!confirmPasswordVisible)
+                  }
+                >
+                  {confirmPasswordVisible ? (
+                    <IoEye size={24} />
+                  ) : (
+                    <IoEyeOff size={24} />
+                  )}
+                </button>
+              </div>
+            </>
+          )}
+
           <Button
             name={isSignUp ? "Sign Up" : "Login"}
             handleOnClick={handleSubmit}
             fw
           />
           <GoogleOAuthProvider clientId={process.env.REACT_APP_GG_CLIENT_ID}>
-          <div className="w-full text-main bg-[#daecd8] rounded-lg py-1 justify-center flex items-center gap-3 mt-2">
-            <GoogleLogin
-              onSuccess={handleGoogleLoginSuccess}
-              onError={handleGoogleLoginError}
-              width={400}
-              text="continue_with"
-              locale="en"
-              type="icon"
-              shape="circle"
-              logo_alignment="left"
-              size="medium"
-            /> Continue With Google
-           </div> 
+            <div className="w-full text-main bg-[#daecd8] rounded-lg py-1 justify-center flex items-center gap-3 mt-2">
+              <GoogleLogin
+                onSuccess={handleGoogleLoginSuccess}
+                onError={handleGoogleLoginError}
+                width={400}
+                text="continue_with"
+                locale="en"
+                type="icon"
+                shape="circle"
+                logo_alignment="left"
+                size="medium"
+              />{" "}
+              Continue With Google
+            </div>
           </GoogleOAuthProvider>
-
-
-
 
           <div className="w-full text-sm flex items-center justify-between mt-4">
             {!isSignUp ? (

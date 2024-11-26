@@ -80,9 +80,20 @@ module.exports = {
           '0%': { transform: 'translateX(50px)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },
         },
+        bounce2: {
+          '0%': { transform: 'translateY(0)'},
+          '100%': { transform: 'translateY(0)'},
+          '50%': { transform: 'translateY(-16px)'},
+        },
+        'pulse-animation': {
+          '0%': { boxShadow: '0 0 0 0 rgba(163, 247, 196, 0.5)' },
+          '70%': { boxShadow: '0 0 0 20px rgba(163, 247, 196, 0)' },
+          '100%': { boxShadow: '0 0 0 0 rgba(163, 247, 196, 0)' },
+        },
 
       },
-
+      
+      
       animation: {
         'spin-slow': 'spin 8s linear infinite',
         'scale-up-center': 'scale-up-center 0.8s cubic-bezier(0.390, 0.575, 0.565, 1.000) both',
@@ -93,6 +104,8 @@ module.exports = {
         'slideInUp': 'slideInUp 1.5s ease-out',
         'rotateIn': 'rotateIn 1.5s ease-out',
         'CartInRight': 'CartInRight 0.5s ease-in-out',
+        'bounce2': 'bounce2 5s infinite linear',
+        'pulse-animation': 'pulse-animation 2s infinite'
       },
       
     },

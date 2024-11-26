@@ -1,4 +1,4 @@
-const mongoose = require('mongoose'); // Erase if already required
+const mongoose = require('mongoose');
 
 // Declare the Schema of the Mongo model
 var couponSchema = new mongoose.Schema({
@@ -15,6 +15,20 @@ var couponSchema = new mongoose.Schema({
     expire:{
         type:Date,
         required:true,
+    },
+    usageLimit: { // Số lần sử dụng tối đa của coupon
+        type: Number,
+        required: true,
+        default: 1
+    },
+    usedBy: { // Danh sách người dùng đã sử dụng coupon này
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'User',
+        default: []
+    },
+    usedCount: { // Số lần coupon đã được sử dụng
+        type: Number,
+        default: 0
     },
 }, {
     timestamps: true

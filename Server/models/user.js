@@ -22,11 +22,11 @@ var userSchema = new mongoose.Schema({
     mobile:{
         type:String,
         unique:true,
-        require: true
+        // require: true
     },
     password:{
         type:String,
-        required:true,
+        // required:true,
     },
     role:{
         type:String,
@@ -70,7 +70,10 @@ var userSchema = new mongoose.Schema({
     },
     registerToken: {
         type: String
-    }
+    },
+    verificationCode: { type: String },
+    verificationCodeExpires: { type: Date },
+    newMobile: { type: String },
 },{
     timestamps: true
 });

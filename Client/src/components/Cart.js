@@ -8,14 +8,15 @@ import { AiFillDelete } from "react-icons/ai";
 import { apiRemoveCart } from "../apis";
 import Swal from "sweetalert2";
 import { getCurrentUser } from "../store/user/asyncActions";
-import { useNavigate } from "react-router-dom";
+import { createSearchParams, useLocation, useNavigate } from "react-router-dom";
 import path from "../ultils/path";
 import EmptyCart from "../assets/emptycart.png";
 
 const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { currentCart } = useSelector((state) => state.user);
+  const { current, currentCart } = useSelector((state) => state.user);
+  const location = useLocation();
 
   const removeCart = async (pid, color) => {
     const response = await apiRemoveCart(pid, color);
@@ -31,12 +32,41 @@ const Cart = () => {
     }
   };
 
+  const handleSubmit = () => {
+    if (current?.isBlocked) {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Account Blocked!',
+        text: 'Your account is blocked, and you cannot check out at this time.',
+        confirmButtonText: 'OK',
+      });
+    }
+    if (!current?.address) {
+      return Swal.fire({
+        icon: 'info',
+        title: 'Add your Address!',
+        text: 'Please update your Address to Order Product!',
+        showCancelButton: true,
+        cancelButtonText: 'No',
+        showConfirmButton: true,
+        confirmButtonText: 'Go Add Address',
+      }).then((result) => {
+        if (result.isConfirmed) navigate({
+          pathname: `/${path.MEMBER}/${path.PERSONAL}`,
+          search: createSearchParams({ redirect: location.pathname }).toString()
+        });
+      });
+    } else {
+      window.open(`${path.CHECKOUT}`, '_blank');
+    }
+  };
+
  
   return (
     
     <div
       onClick={(e) => e.stopPropagation()}
-      className="grid grid-rows-10 w-[400px] h-screen bg-white p-6 fixed animate-CartInRight"
+      className="grid grid-rows-10 w-[400px] h-[810px] my-4 mr-4 bg-white p-6 fixed animate-CartInRight rounded-[20px] shadow-md shadow-[#87ad95]"
     >
       <header className=" flex justify-between items-center border-b border-main row-span-1 h-full font-bold text-2xl">
         <span className="text-main font-bold">YOUR CART</span>
@@ -79,9 +109,9 @@ const Cart = () => {
               </div>
               <span
                 onClick={() => removeCart(el.product?._id, el.color)}
-                className="h-8 w-8 rounded-full hover:bg-gray-700 flex cursor-pointer items-center justify-center"
+                className="h-8 w-8 rounded-full hover:bg-gray-100 text-black hover:text-[#ea4d4d] flex cursor-pointer items-center justify-center"
               >
-                <AiFillDelete size={18} />
+                <AiFillDelete size={18}/>
               </span>
             </div>
           ))}
@@ -96,7 +126,7 @@ const Cart = () => {
                 (sum, el) => sum + Number(el.price)* el.quantity,
                 0
               )
-            ) + "VNĐ"}
+            ) + " VNĐ"}
           </span>
         </div>
         <span className="text-center text-xs">
@@ -106,8 +136,10 @@ const Cart = () => {
           handleOnClick={() => {
             dispatch(showCart());
             navigate(`/${path.DETAIL_CART}`);
+            // navigate(`/${path.CHECKOUT}`);
             window.scrollTo(0, 0);
           }}
+          // handleOnClick={handleSubmit}
           name="Go To Detail Cart"
           style="flex items-center justify-center bg-main text-white text-[18px] p-3 rounded-lg w-[350px] hover:text-[#F5F5FA]"
         />

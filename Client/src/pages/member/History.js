@@ -374,10 +374,9 @@ import { OrderDetail } from ".";
 
 
   const statusStyles = {
-    Processing: "bg-yellow-300 text-yellow-800",
+    Confirmed: "bg-yellow-300 text-yellow-800",
     "Awaiting Confirmation": "bg-gray-200 text-gray-800",
-    "On The Way": "bg-orange-300 text-orange-800",
-    Shipped: "bg-blue-300 text-blue-800",
+    "Shipped Out": "bg-blue-300 text-blue-800",
     "On Delivery": "bg-pink-300 text-pink-800",
     Delivered: "bg-green-300 text-green-800",
     Cancelled: "bg-red-800 text-red-200",
@@ -632,21 +631,22 @@ const History = () => {
                 <span className="font-semibold">Total: </span>
                 <span>{`${formatMoney(el.total)} VNĐ`}</span>
               </div>
-              <div className="mt-2">
+              {/* <div className="mt-2">
                 <span className="font-semibold">Payment Method: </span>
                 <span>{el.paymentMethod}</span>
               </div>
               <div className="mt-2">
                 <span className="font-semibold">Payment Status: </span>
                 <span>{el.paymentStatus}</span>
-              </div>
+              </div> */}
               <div className="mt-2">
                 <span className="font-semibold">Order Status: </span>
                 <span className={`px-2 py-1 rounded-full ${statusStyles[el.status] || 'bg-gray-300 text-gray-800'}`}>
                   {el.status}
                 </span>
               </div>
-              <div className="mt-2">
+              
+              <div className="">
                 <h4 className="font-semibold py-2">Products:</h4>
                 <div className="flex flex-col">
                   {el.products?.map((item) => (

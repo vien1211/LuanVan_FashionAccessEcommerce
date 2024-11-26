@@ -84,11 +84,13 @@ export const apiUpdateCurrent = (data) => axios({
   data
 })
 
+
 export const apiUpdateCart = (data) => axios({
   url: '/user/cart',
   method: 'put',
   data
 })
+
 
 export const apiRemoveCart = (pid, color) => axios({
   url: `/user/remove-cart/${pid}/${color}`,
@@ -99,3 +101,69 @@ export const apiUpdateWishlist = (pid) => axios({
   url: `/user/wishlist/` + pid,
   method: 'put',
 })
+
+
+// export const apiSendVerificationCode = async (data) => {
+//   try {
+//     const response = await axios.post('/user/send-verification-code', data);
+//     return response;
+//   } catch (error) {
+//     throw error; 
+//   }
+// };
+
+export const apiSendVerificationCode = async (data) => {
+  try {
+    const response = await axios.post('/user/send-verification-code', data);
+    
+    // Kiểm tra nếu phản hồi từ backend có cấu trúc success và message
+    if (response?.data) {
+      const { success, message } = response.data;
+      return { success, message };  // Trả về đối tượng có cấu trúc { success, message }
+    }
+    
+    // Nếu không có dữ liệu hợp lệ từ backend, trả về một lỗi mặc định
+    return { success: false, message: "Unexpected error occurred" };
+  } catch (error) {
+    // Kiểm tra lỗi từ backend nếu có
+    const errorMessage = error?.response?.data?.message || "An unexpected error occurred";
+    return { success: false, message: errorMessage };  // Trả về đối tượng lỗi với thông báo
+  }
+};
+
+
+export const apiVerifyCodeAndUpdateEmail = async (data) => {
+  try {
+    const response = await axios.post('/user/verify-code-update-email', data);
+    return response;
+  } catch (error) {
+    throw error; 
+  }
+};
+
+export const apiChangePassword = async (data) => {
+  try {
+    const response = await axios.put('/user/change-password', data);
+    return response; 
+  } catch (error) {
+    throw error; 
+  }
+};
+
+// export const apiSendOtp = async(data) => {
+//   try {
+//     const response = await axios.post('/user/send-otp', data);
+//     return response;
+//   } catch (error) {
+//     throw error; 
+//   }
+// };
+
+export const apiSendOtp = (phoneNumber) => {
+  return axios.post('/user/send-otp', { mobile: phoneNumber });
+};
+
+
+export const apiVerifyOtp = (phoneNumber, otp) => {
+  return axios.post('/user/verify-otp', { mobile: phoneNumber, otp });
+};

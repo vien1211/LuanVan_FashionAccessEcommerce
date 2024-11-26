@@ -6,7 +6,8 @@ import {
 import { useEffect } from "react";
 import { apiCreateOrder } from "../apis";
 import Swal from "sweetalert2";
-
+import { showModal } from "../store/app/appSlice";
+import Loading from "./Loading";
 import { useNavigate } from "react-router-dom";
 
 // This value is from the props in the UI
@@ -34,21 +35,35 @@ const ButtonWrapper = ({
   }, [currency, showSpinner]);
 
   const handleSaveOrder = async () => {
+    dispatch(showModal({ isShowModal: true, modalChildren: <Loading /> }));
     const response = await apiCreateOrder({
       ...payload,
       status: "Awaiting Confirmation",
       paymentStatus: "Paid",
       paymentMethod: "paypal",
     });
+    dispatch(showModal({ isShowModal: false, modalChildren: null }));
 
     if (response.success) {
       setIsSuccess(true);
       setTimeout(() => {
-        Swal.fire("Congratulation!", "Order Successfully!", "success").then(
-          () => {
-            navigate("/");
-          }
-        );
+        // Swal.fire("Congratulation!", "Order Successfully!", "success").then(
+        //   () => {
+        //     navigate("/");
+        //   }
+        // );
+        Swal.fire({
+          title: "<h3 style='color: #4CAF50;'>Congratulation!</h3>",
+          text: "Order Successfully!",
+          icon: "success",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+          },
+        }).then(() => {
+          navigate("/member/order-history");
+        });
       }, 500);
     }
   };

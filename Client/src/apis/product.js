@@ -41,6 +41,20 @@ export const apiAddVariant =(data, pid) => axios ({
     data
 })
 
+// export const apiUpdateVariant =(data, pid, variantId) => axios ({
+//     url: '/product/update-variant/' + pid + variantId,
+//     method: 'put',
+//     data
+// })
+
+
+export const apiUpdateVariant = (data, variantId) => axios({
+    url: `/product/update-variant/${variantId}`,
+    method: 'put',
+    data,
+});
+
+
 export const apiCreateOrder =(data) => axios ({
     url: '/order/',
     method: 'post',
@@ -101,6 +115,24 @@ export const apiCreateGoodsReceipt =(data) => axios ({
 
 export const apiGetReceipts  = (params) => axios({
     url: '/purchaseorder/',
+    method: 'get',
+    params
+})
+
+export const apiGetProfit =(params) => axios ({
+    url: '/order/admin/profit',
+    method: 'get',
+    params
+})
+
+export const apiGetDailyProfit =(params) => axios ({
+    url: '/order/admin/daily-profit',
+    method: 'get',
+    params
+})
+
+export const apiGetMonthlyProfit =(params) => axios ({
+    url: '/order/admin/monthly-profit',
     method: 'get',
     params
 })

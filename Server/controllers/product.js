@@ -7,13 +7,15 @@ const slugify = require("slugify");
 const makeSKU = require('uniqid')
 
 const createProduct = asyncHandler(async (req, res) => {
-  const { title, price, description, category, brand, color } =
+  const { title, description, category, brand, color,price } =
     req.body;
+
   const images = req.files?.images?.map((el) => el.path);
   if (
-    !(title && price && description && category && brand && color)
+    !(title && description && category && brand && color)
   )
     throw new Error("Mising inputs");
+  req.body.price = price || 0;
   req.body.slug = slugify(title);
   if (images) req.body.images = images;
   const newProduct = await Product.create(req.body);
@@ -117,6 +119,8 @@ const getAllProduct = asyncHandler(async (req, res) => {
       }));
       colorQueryObject = { $or: colorQuery };
     }
+    
+    
 
     let queryObject = {};
 
@@ -130,6 +134,12 @@ const getAllProduct = asyncHandler(async (req, res) => {
           { brand: { $regex: queries.q, $options: "i" } },
         ],
       };
+    }
+
+    if (queries?.price) {
+      formattedQueries.price = { ...formattedQueries.price };
+    } else {
+      formattedQueries.price = { $exists: true }; // Include products with a price field
     }
 
     // Merge color filtering with other queries
@@ -198,6 +208,8 @@ const getAllProduct = asyncHandler(async (req, res) => {
   }
 });
 
+
+
 const updateProduct = asyncHandler(async (req, res) => {
   const { pid } = req.params;
   const files = req?.files;
@@ -238,8 +250,8 @@ const deleteProduct = asyncHandler(async (req, res) => {
 });
 
 const ratings = asyncHandler(async (req, res) => {
-  const { _id } = req.user; // User ID should be an ObjectId
-  const { star, comment, pid, createdAt } = req.body; // Product ID should be an ObjectId
+  const { _id } = req.user;
+  const { star, comment, pid, createdAt } = req.body;
 
   if (!star || !pid || !comment) {
     return res.status(400).json({ success: false, message: "Missing Inputs" });
@@ -360,7 +372,7 @@ const addVariant = asyncHandler(async (req, res) => {
     throw new Error("Mising inputs");
   const response = await Product.findByIdAndUpdate(
     pid,
-    { $push: { variant: {color, price, title, quantity: 0, sold: 0, images, sku: makeSKU().toUpperCase()} } },
+    { $push: { variant: {color, price, title, images, sku: makeSKU().toUpperCase()} } },
     { new: true }
   );
   return res.status(200).json({
@@ -368,6 +380,76 @@ const addVariant = asyncHandler(async (req, res) => {
     response: response ? "Added Variant" : "Cannot upload image product",
   });
 });
+
+// const updateVariant = asyncHandler(async (req, res) => {
+//   const { variantId } = req.params;
+//   const { title, price, color } = req.body;
+//   const images = req.files?.images?.map((el) => el.path);
+  
+//   if (!(title && price && color))
+//     throw new Error("Missing inputs");
+  
+//   const product = await Product.findOneAndUpdate(
+//     {"variant._id": variantId },  // Tìm sản phẩm và variant cần cập nhật
+//     {
+//       $set: {
+//         "variant.$.title": title,
+//         "variant.$.price": price,
+//         "variant.$.color": color,
+//         ...(images && { "variant.$.images": images }),  // Cập nhật hình ảnh nếu có
+//       }
+//     },
+//     { new: true }
+//   );
+  
+//   if (!product) {
+//     return res.status(404).json({
+//       success: false,
+//       message: "Variant not found or cannot update",
+//     });
+//   }
+
+//   return res.status(200).json({
+//     success: true,
+//     message: "Variant updated successfully",
+//     product,
+//   });
+// });
+
+const updateVariant = asyncHandler(async (req, res) => {
+  const { variantId } = req.params;
+  const { title, price, color } = req.body;
+  const images = req.files?.images?.map((el) => el.path);
+  
+  // Initialize an update object
+  const updateData = {};
+
+  if (title) updateData["variant.$.title"] = title;
+  if (price) updateData["variant.$.price"] = price;
+  if (color) updateData["variant.$.color"] = color;
+  if (images) updateData["variant.$.images"] = images; // Only update images if provided
+  
+  const product = await Product.findOneAndUpdate(
+    { "variant._id": variantId },
+    { $set: updateData }, // Use the updateData object
+    { new: true }
+  );
+  
+  if (!product) {
+    return res.status(404).json({
+      success: false,
+      message: "Variant not found or cannot update",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Variant updated successfully",
+    product,
+  });
+});
+
+
 
 module.exports = {
   createProduct,
@@ -377,5 +459,6 @@ module.exports = {
   deleteProduct,
   ratings,
   uploadimagesProduct,
-  addVariant
+  addVariant,
+  updateVariant
 };

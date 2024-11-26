@@ -13,16 +13,21 @@ var orderSchema = new mongoose.Schema({
     status:{
         type:String,
         default: 'Awaiting Confirmation',
-        enum: ['Cancelled','Awaiting Confirmation', 'Processing', 'On The Way', 'Shipped', 'On Delivery', 'Delivered', 'Success']
+        enum: ['Cancelled','Awaiting Confirmation', 'Confirmed', 'Shipped Out', 'On Delivery', 'Delivered', 'Success']
     },
+    statusHistory: [ 
+        {
+            status: { type: String, required: true }, 
+            updatedAt: { type: Date, default: Date.now } 
+        }
+    ],
     total: Number,
-    // coupon: {
-    //     type: mongoose.Types.ObjectId, ref: 'Coupon'
-    // },
+    coupon: {
+        type: mongoose.Types.ObjectId, ref: 'Coupon'
+    },
     paymentMethod: {
         type: String,
         enum: ['paypal', 'cod'],
-        // enum: ['Credit Card', 'PayPal', 'Bank Transfer', 'Cash on Delivery'],
         required: true
     },
 

@@ -32,10 +32,13 @@ const path = {
     INVENTORY: 'inventory',
     IMPORT_GOODS: 'import-goods',
     MANAGE_GOODS_RECEIPT: 'manage-goods-receipt',
+    COUPON: 'coupon',
+    ADMIN_CHAT: 'admin-chat',
 
     MANAGE_BLOG_CATEGORY: 'manage-blog-category',
     CREATE_BLOG_POST: 'create-blog-post',
     MANAGE_BLOG_POST: 'manage-blog-post',
+    PROFIT: 'profit',
 
     MEMBER: 'member',
     PERSONAL: 'personal',
@@ -43,7 +46,11 @@ const path = {
     WISHLIST: 'wishlist',
     HISTORY: 'order-history',
     M_BLOG: 'm-blog',
-    M_BLOG_LIST: 'm-blog-list'
+    M_BLOG_LIST: 'm-blog-list',
+    UPDATE_EMAIL: 'update-email',
+    VERIFY_UPDATE_EMAIL: 'verify-update-email',
+    CHANGE_PASSWORD: 'change-password',
+    UPDATE_PHONE_NUMBER: 'update-phone-number',
 }
 
 export default path

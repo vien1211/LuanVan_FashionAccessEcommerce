@@ -161,6 +161,11 @@ const CustomVariant = ({ customVariant, setCustomVariant }) => {
           text: "Variant Product Created Successfully!",
           icon: "success",
           confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+          },
         });
         reset();
         setPreview({ images: [] });
@@ -170,6 +175,11 @@ const CustomVariant = ({ customVariant, setCustomVariant }) => {
           text: "Failed to Create Variant Product!",
           icon: "error",
           confirmButtonText: "OK",
+          customClass: {
+            title: "custom-title",
+            text: "custom-text",
+            confirmButton: "custom-confirm-button",
+          },
         });
       }
     }
@@ -204,7 +214,8 @@ const CustomVariant = ({ customVariant, setCustomVariant }) => {
               errors={errors}
               id="price"
               fullWidth
-              style="flex-auto border-main rounded-md"
+              style="flex-auto border-main rounded-md opacity-70"
+              readOnly={true}
             />
 
             <InputForm
@@ -216,7 +227,7 @@ const CustomVariant = ({ customVariant, setCustomVariant }) => {
               style="flex-auto border-main rounded-md"
             />
 
-            <InputForm
+            {/* <InputForm
               label="Variant Quantity"
               register={register}
               errors={errors}
@@ -225,7 +236,7 @@ const CustomVariant = ({ customVariant, setCustomVariant }) => {
               fullWidth
               readOnly={true}
               style="flex-auto border-main rounded-md opacity-70"
-            />
+            /> */}
           </div>
 
           <div className="flex flex-col gap-4 mt-8">

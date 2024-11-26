@@ -15,7 +15,12 @@ router.put('/resetpassword', ctrls.resetPassword)
 router.get('/', [verifyAccessToken, isAdmin], ctrls.getUsers)
 router.get('/user-today', [verifyAccessToken, isAdmin], ctrls.getUsersToday)
 router.put('/current', [verifyAccessToken], uploader.single('avatar'), ctrls.updateUser)
-router.put('/address', [verifyAccessToken], ctrls.updateUserAddress)
+// router.put('/current/address', [verifyAccessToken], ctrls.updateUserAddress)
+router.post('/send-verification-code', ctrls.sendVerificationCode);
+router.post('/verify-code-update-email',[verifyAccessToken], ctrls.verifyCodeAndUpdateEmail);
+router.put('/change-password',[verifyAccessToken], ctrls.changePassword);
+router.post('/send-otp',[verifyAccessToken], ctrls.sendOTP);
+router.post('/verify-otp',[verifyAccessToken], ctrls.verifyAndUpdateMobile);
 router.put('/cart', [verifyAccessToken], ctrls.updateCart)
 router.delete('/:uid', [verifyAccessToken, isAdmin], ctrls.deleteUser)
 router.put('/wishlist/:pid', [verifyAccessToken], ctrls.updateWishList)

@@ -13,7 +13,9 @@ import useDebounce from "../../hooks/useDebounce";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-
+import avt from "../../assets/avtDefault.avif"
+import icons from "../../ultils/icons";
+const {CiEdit, CiEraser, CiUndo } = icons;
 
 const ManageUser = () => {
   const {
@@ -201,6 +203,7 @@ const ManageUser = () => {
             <thead className="font-bold bg-[#273526] text-white text-[13px]">
               <tr>
                 <th className="px-2 py-2">#</th>
+                <th className="px-2 py-2">Avatar</th>
                 <th className="px-2 py-2">Email Address</th>
                 <th className="px-2 py-2">Firstname</th>
                 <th className="px-2 py-2">Lastname</th>
@@ -223,8 +226,16 @@ const ManageUser = () => {
                   <td className="px-2 py-2">{((+params.get('page') > 1 ? +params.get('page') - 1 : 0) * process.env.REACT_APP_LIMIT) + index + 1}</td>
 
                   <td className="py-2 px-2">
-                    {editEl?._id === el._id ? (
-                      <InputForm
+                    <img 
+                      src={el.avatar || avt}
+                      alt="avatar"
+                      className="w-8 h-8 object-cover rounded-full"
+                    />
+                  </td>
+
+                  <td className="py-2 px-2">
+                    
+                      {/* <InputForm
                         register={register}
                         fullWidth
                         errors={errors}
@@ -233,15 +244,15 @@ const ManageUser = () => {
                         validate={{
                           required: "Require",
                           pattern: {
-                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                             message: "invalid email address",
                           },
                         }}
                         style='rounded-md'
                       />
-                    ) : (
+                    ) : ( */}
                       <span>{el.email}</span>
-                    )}
+                    {/* )} */}
                   </td>
                   <td className="py-2 px-2">
                     {editEl?._id === el._id ? (
@@ -274,7 +285,7 @@ const ManageUser = () => {
                     )}
                   </td>
                   <td className="py-2 px-2">
-                    {editEl?._id === el._id ? (
+                    {/* {editEl?._id === el._id ? (
                       <Select
                         register={register}
                         fullWidth
@@ -285,12 +296,12 @@ const ManageUser = () => {
                         option={roles}
                          style='rounded-md'
                       />
-                    ) : (
+                    ) : ( */}
                       <span>{roles.find(role => +role.code === +el.role)?.value}</span>
-                    )}
+                    {/* )} */}
                   </td>
                   <td className="py-2 px-2">
-                    {editEl?._id === el._id ? (
+                    {/* {editEl?._id === el._id ? (
                       <InputForm
                         register={register}
                         fullWidth
@@ -300,15 +311,16 @@ const ManageUser = () => {
                         validate={{
                           required: "Require",
                           pattern: {
-                            value: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/gm,
+                            // value: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/gm,
+                            value: /^\+84\d{9}$/,
                             message: "invalid phone number",
                           },
                         }}
                          style='rounded-md'
-                      />
-                    ) : (
+                      /> */}
+                    {/* ) : ( */}
                       <span>{el.mobile}</span>
-                    )}
+                    {/* )} */}
                   </td>
                   <td className="py-2 px-2">
                     {editEl?._id === el._id ? (
@@ -333,23 +345,23 @@ const ManageUser = () => {
                     {editEl?._id === el._id ? (
                       <span
                         onClick={() => setEditEl(null)}
-                        className="px-4 py-2 text-white cursor-pointer bg-gray-800 rounded-[5px] hover:bg-gray-500 transition duration-150"
+                        className="px-2 py-2 text-white cursor-pointer bg-gray-800 rounded-full hover:bg-gray-500 transition duration-150"
                       >
-                        Back
+                        <CiUndo size={20} />
                       </span>
                     ) : (
                       <span
                         onClick={() => setEditEl(el)}
-                        className="px-4 py-2 text-white cursor-pointer bg-main rounded-[5px] hover:bg-[#79a076] transition duration-150"
+                        className="px-2 py-2 text-white cursor-pointer bg-main rounded-full hover:bg-[#79a076] transition duration-150"
                       >
-                        Edit
+                         <CiEdit size={20} />
                       </span>
                     )}
                     <span
                       onClick={() => handleDeleteUser(el._id)}
-                      className="px-4 py-2 text-white cursor-pointer bg-red-600 rounded-[5px] hover:bg-red-700 transition duration-150"
+                      className="px-2 py-2 text-white cursor-pointer bg-red-600 rounded-full hover:bg-red-700 transition duration-150"
                     >
-                      Delete
+                       <CiEraser size={20} />
                     </span>
                   </td>
                 </tr>
