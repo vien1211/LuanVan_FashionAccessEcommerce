@@ -221,7 +221,7 @@ const ManageProduct = () => {
   return (
     <div className="w-full p-4 my-4 relative">
       {editProduct && (
-        <div className="absolute inset-0 z-50 min-h-screen bg-[#F5F5FA] ">
+        <div className="absolute inset-0 z-20 min-h-screen bg-[#F5F5FA] ">
           <UpdateProduct
             editProduct={editProduct}
             render={render}

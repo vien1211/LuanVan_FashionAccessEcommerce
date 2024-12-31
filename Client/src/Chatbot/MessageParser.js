@@ -12,7 +12,6 @@ const MessageParser = ({ children, actions }) => {
         return React.cloneElement(child, {
           parse: parse,
           actions: {},
-          // actions: actions, 
         });
       })}
     </div>

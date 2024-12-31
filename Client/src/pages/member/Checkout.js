@@ -13,7 +13,7 @@ import { getCurrentUser } from "../../store/user/asyncActions";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { apiApplyCoupon, apiGetCoupon } from "../../apis";
+import { apiApplyCoupon, apiCancelApplyCoupon, apiGetCoupon } from "../../apis";
 import { FaMapMarkerAlt, FaUserAlt, FaPhoneAlt } from "react-icons/fa";
 import NoCoupon from "../../assets/no coupon.png";
 
@@ -176,6 +176,60 @@ const Checkout = () => {
     }
   };
 
+  const handleCouponCancel = async () => {
+    // Reset the coupon state
+    setCouponCode("");
+    setDiscount(0);
+    setHasUsedCoupon(false);
+
+    // Find the coupon to cancel from the coupons list
+    const couponToCancel = coupons.find((c) => c.name === coupon);
+
+    if (!couponToCancel) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Coupon not found.",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    try {
+      // Send the request to remove the coupon usage
+      const response = await apiCancelApplyCoupon({
+        userId: current._id, // Ensure you have the user ID
+        couponId: couponToCancel._id, // The coupon ID applied earlier
+      });
+
+      // Check response and show success or error messages
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Coupon Removed",
+          text: "The coupon has been removed from your order.",
+          confirmButtonText: "OK",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: response.data.message,
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (error) {
+      // Handle errors during the API call
+      console.error("Error removing coupon:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Could not remove the coupon. Please try again later.",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
   const handleOrder = async () => {
     try {
       await axios.post("/api/orders", {
@@ -311,44 +365,52 @@ const Checkout = () => {
             <ul className="mt-2">
               {coupons && coupons.length > 0 ? (
                 <>
-                {coupons
-                  .filter((coupon) => new Date(coupon.expire) > new Date())
-                  .map((coupon) => (
-                    <li
-                      key={coupon.id}
-                      className="mt-2 p-4 bg-[#e8f3ec] rounded-md"
-                    >
-                      <div className="flex justify-between">
-                        <span className="font-semibold">{coupon.name}</span>
-                        <span className="text-main">
-                          {coupon.discount}% off
+                  {coupons
+                    .filter((coupon) => new Date(coupon.expire) > new Date())
+                    .map((coupon) => (
+                      <li
+                        key={coupon.id}
+                        className="mt-2 p-4 bg-[#e8f3ec] rounded-md"
+                      >
+                        <div className="flex justify-between">
+                          <span className="font-semibold">{coupon.name}</span>
+                          <span className="text-main">
+                            {coupon.discount}% off
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Valid until{" "}
+                          {moment(coupon.expire).format("DD [Th]MM, YYYY")}
+                        </div>
+                        <span className="text-xs text-gray-400">
+                          Please enter the code into the box.
                         </span>
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Valid until{" "}
-                        {moment(coupon.expire).format("DD [Th]MM, YYYY")}
-                      </div>
-                      <span className="text-xs text-gray-400">
-                        Please enter the code into the box.
-                      </span>
-                    </li>
-                    
-                  ))}
+                      </li>
+                    ))}
                   <div className="flex mt-4">
-              <input
-                type="text"
-                value={coupon}
-                onChange={(e) => setCoupon(e.target.value)}
-                placeholder="Enter coupon code"
-                className="border p-2 rounded w-full mr-2"
-              />
-              <Button
-                handleOnClick={handleCouponApply}
-                name="Apply"
-                style="bg-[#fc3c44] text-white p-2 rounded"
-              />
-            </div>
-            </>
+                    <input
+                      type="text"
+                      value={coupon}
+                      onChange={(e) => setCoupon(e.target.value)}
+                      placeholder="Enter coupon code"
+                      className="border p-2 rounded w-full mr-2"
+                    />
+
+                    {hasUsedCoupon ? (
+                      <Button
+                        handleOnClick={handleCouponCancel}
+                        name="Cancel"
+                        style="bg-[#8f5151] text-white p-2 ml-2 rounded"
+                      />
+                    ) : (
+                      <Button
+                        handleOnClick={handleCouponApply}
+                        name="Apply"
+                        style="bg-[#fc3c44] text-white p-2 rounded"
+                      />
+                    )}
+                  </div>
+                </>
               ) : (
                 <div className="text-center">
                   <img
@@ -359,7 +421,6 @@ const Checkout = () => {
                 </div>
               )}
             </ul>
-            
           </div>
 
           <div className="h-fit my-[20px] col-span-3 p-5 shadow-md border rounded-[15px]">

@@ -170,7 +170,7 @@ const ManageOrder = () => {
               <th className="px-2 py-2">Total</th>
               <th className="px-2 py-2">P.Method</th>
               <th className="px-2 py-2">P.Status</th>
-              <th className="px-2 py-2">Order Status</th>
+              <th className="px-2 py-2">O.Status</th>
               {/* <th className="px-2 py-2">Created At</th> */}
               <th className="px-2 py-2">Status History</th>
               {/* <th className="px-2 py-2">Updated At</th> */}
@@ -276,7 +276,7 @@ const ManageOrder = () => {
                 </td>
 
                 <td className="py-16 px-2 flex gap-2">
-                  {el.status.toLowerCase() === "cancelled" ? (
+                  {el.status.toLowerCase() === "cancelled" || el.status.toLowerCase() === "success" ? (
                     <span className="px-2 py-2 text-gray-400 cursor-not-allowed">
                       <CiEdit size={20} className="opacity-5"/>
                     </span>

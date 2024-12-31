@@ -77,6 +77,22 @@ const CardProduct = ({ productData, pid, className }) => {
         });
       }
 
+      // const productPrice = curentProduct?.price || product?.price || 0;
+      const productPrice = productData?.price || 0;
+    if (productPrice <= 0) {
+      return Swal.fire({
+        title: "Not Ready!",
+        text: "This product is not ready yet, you can add it to your favorites and wait later",
+        icon: "warning",
+        confirmButtonText: "OK",
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+        },
+      });
+    }
+
       const response = await apiUpdateCart({
         pid: productData?._id,
         color: productData?.color,

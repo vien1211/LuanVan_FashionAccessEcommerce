@@ -56,6 +56,8 @@ const Login = () => {
       confirmPassword: "",
     });
   };
+
+  
   // const handleChange = useCallback((nameKey, value) => {
   //   setInvalidFields((prev) => prev.filter((field) => field.nameKey !== nameKey));
 
@@ -81,7 +83,7 @@ const Login = () => {
     );
 
     if (nameKey === "mobile") {
-      const mobileRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/gm;
+      const mobileRegex = /^\d{10,15}$/;
       if (!mobileRegex.test(value)) {
         setInvalidFields((prev) => [
           ...prev,
@@ -136,8 +138,11 @@ const Login = () => {
   // };
   const handleForgotPassWord = async () => {
     try {
+      dispatch(
+        showModal({ isShowModal: true, modalChildren: <Loading /> })
+      );
       const response = await apiForgotPassword({ email });
-      console.log(response);
+      dispatch(showModal({ isShowModal: false, modalChildren: null }));
       Swal.fire({
         title: "Check your email!",
         text: "A link to reset your password has been sent to your email.",

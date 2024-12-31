@@ -125,3 +125,10 @@ const OrderItem = ({ el, defaultQuantity = 1 }) => {
 };
 
 export default OrderItem;
+
+
+
+
+
+
+

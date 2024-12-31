@@ -681,7 +681,7 @@ const History = () => {
                     onClick={() => handleConfirmReceived(el._id)}
                     className="px-3 py-2 text-white cursor-pointer bg-green-600 rounded-[5px] hover:bg-green-700 transition duration-150"
                   >
-                    Đã nhận hàng
+                    Received
                   </span>
                 )}
                 {/* {el.status === "Success" && (
@@ -699,7 +699,7 @@ const History = () => {
                     className="px-3 py-2 text-white cursor-pointer bg-red-600 rounded-[5px] hover:bg-red-700 transition duration-150"
                     onClick={() => handleCancelOrder(el._id)}
                   >
-                    Hủy đơn hàng
+                    Cancel Order
                   </span>
                 )}
                 <span

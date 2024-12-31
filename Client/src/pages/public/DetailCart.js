@@ -106,7 +106,7 @@ const DetailCart = () => {
         confirmButtonText: "OK",
       });
     }
-  
+
     if (!current?.address) {
       return Swal.fire({
         icon: "info",
@@ -126,12 +126,10 @@ const DetailCart = () => {
           });
         }
       });
-    } 
-    else {
+    } else {
       window.open(`${path.CHECKOUT}`, "_blank");
     }
   };
-  
 
   const handleEditAddress = () => {
     navigate({
@@ -156,7 +154,7 @@ const DetailCart = () => {
           {subtotal >= 100000000
             ? "You have free shipping for your order!"
             : subtotal >= 50000000
-            ? "Spend more to get free shipping!"
+            ? "You have free shipping for your order!"
             : subtotal >= 10000000
             ? "Spend more to reduce your shipping fee!"
             : "Add more products to reduce your shipping fee!"}
@@ -205,119 +203,74 @@ const DetailCart = () => {
               <CiEdit size={24} />
             </button>
           </div>
-          
-          {/* <div className=" flex text-[14px] border-t mb-2 py-2">
-            <span className="mt-1 mr-2">
-              {current?.firstname} {current?.lastname}
-            </span>
-            <span className="mt-1">|</span>
-            <span className="mt-1 ml-2">{current?.mobile}</span>
-          </div> */}
+
           <div className="flex text-[14px]">
             <span className="border rounded-md p-1 text-main mr-2 h-fit">
               <FaMapMarkerAlt />
             </span>
-            <span className="text-slate-400">{current?.address || "No Shipping Address"}</span>
+            <span className="text-slate-400">
+              {current?.address || "No Shipping Address"}
+            </span>
           </div>
-          {/* <div className="flex text-[14px] my-2">
-              <span className="border rounded-md p-1 text-main mr-2 h-fit">
-                <FaPhoneAlt />
-              </span>
-              <span className="text-slate-400">{current?.mobile || "No Phone Number"} </span>
-            </div> */}
         </div>
 
-        {/* <div className="mt-4 bg-white border border-gray-200 shadow-md rounded-[10px] p-4">
+        <div className="mt-4 bg-white border border-gray-200 shadow-md rounded-[10px] p-4">
           <h3 className="text-md font-semibold">Special Offer</h3>
           <ul className="mt-2">
             {coupons && coupons.length > 0 ? (
               coupons
                 .filter((coupon) => new Date(coupon.expire) > new Date()) // Filter out expired coupons
-                .map((coupon) => (
-                  <li
-                    key={coupon.id}
-                    className="mt-2 p-4 bg-[#e8f3ec] rounded-md"
-                  >
-                    <div className="flex justify-between">
-                      <span className="font-semibold">{coupon.name}</span>
-                      <span className="text-main">{coupon.discount}% off</span>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      Valid until{" "}
-                      {moment(coupon.expire).format("DD [Th]MM, YYYY")}
-                    </div>
-                    <span className="text-xs text-gray-400">
-                      Please Checkout and enter the code into the box
-                    </span>
-                    <div>{coupon.usedBy.length} / {coupon.usageLimit}</div>
-                  </li>
-                ))
+                .map((coupon) => {
+                  const usagePercentage = Math.min(
+                    ((coupon.usedBy.length / coupon.usageLimit) * 100).toFixed(
+                      2
+                    ), // Tính phần trăm và giới hạn tối đa là 100%
+                    100
+                  );
+
+                  return (
+                    <li
+                      key={coupon.id}
+                      className="mt-2 p-4 bg-[#e8f3ec] rounded-md"
+                    >
+                      <div className="flex justify-between">
+                        <span className="font-semibold">{coupon.name}</span>
+                        <span className="text-main">
+                          {coupon.discount}% off
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Valid until{" "}
+                        {moment(coupon.expire).format("DD [Th]MM, YYYY")}
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        Please Checkout and enter the code into the box
+                      </span>
+                      <div className="mt-2">
+                        <div className="w-full bg-gray-300 rounded-full h-1.5">
+                          <div
+                            className="bg-main h-1.5 rounded-full"
+                            style={{ width: `${usagePercentage}%` }}
+                          ></div>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1 text-right">
+                          {usagePercentage}% used
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })
             ) : (
               <div className="text-center">
-                  <img
-                    src={NoCoupon}
-                    alt="No Coupon Active"
-                    className="w-full h-full opacity-65"
-                  />
-                </div>
+                <img
+                  src={NoCoupon}
+                  alt="No Coupon Active"
+                  className="w-full h-full opacity-65"
+                />
+              </div>
             )}
           </ul>
-        </div> */}
-
-<div className="mt-4 bg-white border border-gray-200 shadow-md rounded-[10px] p-4">
-  <h3 className="text-md font-semibold">Special Offer</h3>
-  <ul className="mt-2">
-    {coupons && coupons.length > 0 ? (
-      coupons
-        .filter((coupon) => new Date(coupon.expire) > new Date()) // Filter out expired coupons
-        .map((coupon) => {
-          const usagePercentage = Math.min(
-            ((coupon.usedBy.length / coupon.usageLimit) * 100).toFixed(2), // Tính phần trăm và giới hạn tối đa là 100%
-            100
-          );
-
-          return (
-            <li
-              key={coupon.id}
-              className="mt-2 p-4 bg-[#e8f3ec] rounded-md"
-            >
-              <div className="flex justify-between">
-                <span className="font-semibold">{coupon.name}</span>
-                <span className="text-main">{coupon.discount}% off</span>
-              </div>
-              <div className="text-sm text-gray-500">
-                Valid until{" "}
-                {moment(coupon.expire).format("DD [Th]MM, YYYY")}
-              </div>
-              <span className="text-xs text-gray-400">
-                Please Checkout and enter the code into the box
-              </span>
-              <div className="mt-2">
-                <div className="w-full bg-gray-300 rounded-full h-1.5">
-                  <div
-                    className="bg-main h-1.5 rounded-full"
-                    style={{ width: `${usagePercentage}%` }}
-                  ></div>
-                </div>
-                <div className="text-xs text-gray-500 mt-1 text-right">
-                  {usagePercentage}% used
-                </div>
-              </div>
-            </li>
-          );
-        })
-    ) : (
-      <div className="text-center">
-        <img
-          src={NoCoupon}
-          alt="No Coupon Active"
-          className="w-full h-full opacity-65"
-        />
-      </div>
-    )}
-  </ul>
-</div>
-
+        </div>
 
         {/* Summary Section */}
         <div className=" shadow-md rounded-[15px] h-fit border mt-4 flex flex-col p-5">
@@ -328,15 +281,6 @@ const DetailCart = () => {
               subtotal
             )} VNĐ`}</span>
           </div>
-
-          {/* {discount > 0 && (
-            <div className="flex justify-between mb-2">
-              <span className="">Discount</span>
-              <span className=" font-bold text-red-600">- {`${formatMoney(
-                discount
-              )} VNĐ`}</span>
-            </div>
-          )} */}
 
           {/* Pass the new total to ShippingFee */}
           <ShippingFee subtotal={totalAfterDiscount} />

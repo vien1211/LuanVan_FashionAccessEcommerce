@@ -65,7 +65,6 @@ const DetailProduct = ({ isQuickView, data }) => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  
 
   const openModal = (image) => {
     setSelectedImage(image);
@@ -152,6 +151,8 @@ const DetailProduct = ({ isQuickView, data }) => {
       console.error("Error fetching product data:", error);
     }
   };
+
+  console.log(product)
 
   const handleSelectOption = async (e) => {
     e.stopPropagation();
@@ -258,6 +259,21 @@ const DetailProduct = ({ isQuickView, data }) => {
       });
     }
 
+    const productPrice = curentProduct?.price || product?.price || 0;
+    if (productPrice <= 0) {
+      return Swal.fire({
+        title: "Not Ready!",
+        text: "This product is not ready yet, you can add it to your favorites and wait later",
+        icon: "warning",
+        confirmButtonText: "OK",
+        customClass: {
+          title: "custom-title",
+          text: "custom-text",
+          confirmButton: "custom-confirm-button",
+        },
+      });
+    }
+
     // Tiếp tục cập nhật giỏ hàng nếu còn hàng
     const response = await apiUpdateCart({
       pid,
@@ -298,39 +314,114 @@ const DetailProduct = ({ isQuickView, data }) => {
     }
   };
 
-  // const handleQuantity = useCallback((number) => {
-  //   const qty = Number(number);
-  //   if (qty > 0) {
+  // const handleQuantity = useCallback(
+  //   (number) => {
+  //     const qty = Math.max(
+  //       1,
+  //       Math.min(
+  //         Number(number) || 1,
+  //         product?.stockInfo?.[curentProduct?.color]?.quantity ||
+  //           product?.stockInfo?.[product?.color]?.quantity ||
+  //           1
+  //       )
+  //     );
   //     setQuantity(qty);
-  //   }
-  // }, []);
-  const handleQuantity = useCallback((number) => {
-    const qty = Math.max(1, Math.min(Number(number) || 1, 
-      product?.stockInfo?.[curentProduct?.color]?.quantity ||
-      product?.stockInfo?.[product?.color]?.quantity || 1));
-    setQuantity(qty);
-  }, [curentProduct?.color, product?.stockInfo]);
-  
+  //   },
+  //   [curentProduct?.color, product?.stockInfo]
+  // );
 
+  // const handleChangeQuantity = useCallback(
+  //   (flag) => {
+  //     setQuantity((prev) => {
+  //       //const maxQuantity = curentProduct.quantity || product?.quantity;
+  //       const maxQuantity =
+  //         product?.stockInfo[curentProduct.color]?.quantity ||
+  //         product?.stockInfo[product.color]?.quantity ||
+  //         1;
+  //       if (flag === "minus" && prev > 1) {
+  //         return prev - 1;
+  //       }
+  //       if (flag === "plus" && prev < maxQuantity) {
+  //         return prev + 1;
+  //       }
+  //       return prev;
+  //     });
+  //   },
+  //   // [product?.quantity, curentProduct.quantity]
+  //   [curentProduct?.color, product?.stockInfo]
+  // );
+
+  const handleQuantity = useCallback(
+    (number) => {
+      const qty = Math.max(
+        1,
+        Math.min(
+          Number(number) || 1,
+          product?.stockInfo?.[curentProduct?.color]?.quantity ||
+            product?.stockInfo?.[product?.color]?.quantity ||
+            1
+        )
+      );
+  
+      // Check if quantity exceeds available stock
+      const maxQuantity =
+        product?.stockInfo?.[curentProduct?.color]?.quantity ||
+        product?.stockInfo?.[product?.color]?.quantity ||
+        1;
+  
+      if (qty > maxQuantity) {
+        Swal.fire({
+          title: "Not enough stock!",
+          text: `Only ${maxQuantity} items are available in stock.`,
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return; // Do not update quantity if it exceeds stock
+      }
+  
+      setQuantity(qty);
+    },
+    [curentProduct?.color, product?.stockInfo]
+  );
+  
   const handleChangeQuantity = useCallback(
     (flag) => {
       setQuantity((prev) => {
-        //const maxQuantity = curentProduct.quantity || product?.quantity;
         const maxQuantity =
-          product?.stockInfo[curentProduct.color]?.quantity ||
-          product?.stockInfo[product.color]?.quantity || 1;
+          product?.stockInfo?.[curentProduct.color]?.quantity ||
+          product?.stockInfo?.[product.color]?.quantity ||
+          1;
+  
         if (flag === "minus" && prev > 1) {
           return prev - 1;
         }
+  
         if (flag === "plus" && prev < maxQuantity) {
           return prev + 1;
         }
+  
+        // Show Swal if trying to increase quantity beyond stock
+        if (flag === "plus" && prev >= maxQuantity) {
+          Swal.fire({
+            title: "Not enough stock!",
+            text: `Only ${maxQuantity} items are available in stock.`,
+            icon: "warning",
+            confirmButtonText: "OK",
+            customClass: {
+              title: "custom-title",
+              text: "custom-text",
+              confirmButton: "custom-confirm-button",
+              cancelButton: "custom-cancel-button",
+            },
+          });
+        }
+  
         return prev;
       });
     },
-    // [product?.quantity, curentProduct.quantity]
     [curentProduct?.color, product?.stockInfo]
   );
+  
 
   useEffect(() => {
     if (pid) fetchProductData();
@@ -497,7 +588,10 @@ const DetailProduct = ({ isQuickView, data }) => {
 
               {!isQuickView && (
                 <div className="flex items-center mt-2">
-                  <Link to={`/products?brand=${product?.brand}`} className="text-[16px] text-white bg-[#be8152] px-3 rounded-full">{`${product?.brand}`}</Link>
+                  <Link
+                    to={`/products?brand=${product?.brand}`}
+                    className="text-[16px] text-white bg-[#be8152] px-3 rounded-full"
+                  >{`${product?.brand}`}</Link>
                 </div>
               )}
               <div className="flex items-center mt-4 ">
@@ -515,15 +609,16 @@ const DetailProduct = ({ isQuickView, data }) => {
                 <span className="text-[16px] ml-4 font-light pr-4 border-r">{`Review: ${
                   product?.ratings?.length || 0
                 }`}</span>
-                <span className="text-[16px] ml-4 font-light pr-4">
-                  In Stock:{" "}
-                  <strong className="text-main">
-                    {product?.stockInfo?.[curentProduct?.color]?.quantity ||
-                      product?.stockInfo?.[product?.color]?.quantity ||
-                      0}{" "}
-                  </strong>
-                </span>
-                
+                {!isQuickView && (
+                  <span className="text-[16px] ml-4 font-light pr-4">
+                    In Stock:{" "}
+                    <strong className="text-main">
+                      {product?.stockInfo?.[curentProduct?.color]?.quantity ||
+                        product?.stockInfo?.[product?.color]?.quantity ||
+                        0}{" "}
+                    </strong>
+                  </span>
+                )}
               </div>
 
               {/* <div className="text-[30px]  font-semibold text-[#D86D6D] mt-4">{`${formatMoney(

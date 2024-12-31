@@ -97,33 +97,108 @@ const UpdateProduct = ({ editProduct, render, setEditProduct }) => {
     });
   };
 
-  const handleUpdateProduct = async (data) => {
-    const invalids = validate(payload, setInvalidField);
-    if (invalids === 0) {
-      if (data.category && data.brand)
-        data.category = categories?.find(
-          (el) => el.title === data.category
-        )?.title;
+  // const handleUpdateProduct = async (data) => {
+  //   const invalids = validate(payload, setInvalidField);
+  //   if (invalids === 0) {
+  //     if (data.category && data.brand)
+  //       data.category = categories?.find(
+  //         (el) => el.title === data.category
+  //       )?.title;
 
-      if (data.brand)
-        data.brand = brands?.find((el) => el.title === watch("brand"))?.title;
-      const finalPayload = { ...data, ...payload };
-      console.log(finalPayload);
-      const formData = new FormData();
-      for (let i of Object.entries(finalPayload)) formData.append(i[0], i[1]);
+  //     if (data.brand)
+  //       data.brand = brands?.find((el) => el.title === watch("brand"))?.title;
+  //     const finalPayload = { ...data, ...payload };
+  //     console.log(finalPayload);
+  //     const formData = new FormData();
+  //     for (let i of Object.entries(finalPayload)) formData.append(i[0], i[1]);
       
-      if (finalPayload.images) {
-        const images =
-          finalPayload?.images?.length === 0
-            ? preview.images
-            : finalPayload.images;
-        for (let image of images) formData.append("images", image);
+  //     if (finalPayload.images) {
+  //       const images =
+  //         finalPayload?.images?.length === 0
+  //           ? preview.images
+  //           : finalPayload.images;
+  //       for (let image of images) formData.append("images", image);
+  //     }
+      
+  //     dispatch(showModal({ isShowModal: true, modalChildren: <Loading /> }));
+  //     const response = await apiUpdateProduct(formData, editProduct._id);
+  //     dispatch(showModal({ isShowModal: false, modalChildren: null }));
+  //     console.log(response);
+  //     if (response.success) {
+  //       Swal.fire({
+  //         title: "Updated",
+  //         text: "Update Product Successfully!",
+  //         icon: "success",
+  //         confirmButtonText: "OK",
+  //         customClass: {
+  //           title: "custom-title",
+  //           text: "custom-text",
+  //           confirmButton: "custom-confirm-button",
+  //         },
+  //       });
+  //       render();
+  //       setEditProduct(null);
+  //     } else {
+  //       Swal.fire({
+  //         title: "Oops!",
+  //         text: "Failed to Update Variant Product!",
+  //         icon: "error",
+  //         confirmButtonText: "OK",
+  //         customClass: {
+  //           title: "custom-title",
+  //           text: "custom-text",
+  //           confirmButton: "custom-confirm-button",
+  //         },
+  //       });
+  //     }
+  //   }
+  // };
+
+  const handleUpdateProduct = async (data) => {
+    if (!editProduct) {
+      Swal.fire({
+        title: "Error",
+        text: "No product selected for updating!",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+  
+    const formData = new FormData();
+  
+    // Append fields to formData only if they are provided
+    if (data.title) formData.append("title", data.title);
+    if (data.price) formData.append("price", data.price);
+    if (data.category) {
+      const categoryTitle = categories?.find((el) => el.title === data.category)?.title;
+      if (categoryTitle) formData.append("category", categoryTitle);
+    }
+    if (data.brand) {
+      const brandTitle = brands?.find((el) => el.title === data.brand)?.title;
+      if (brandTitle) formData.append("brand", brandTitle);
+    }
+    if (data.description) formData.append("description", data.description);
+  
+    // Append new images to the FormData object if they are changed
+    if (data.images && data.images.length > 0) {
+      for (let i = 0; i < data.images.length; i++) {
+        formData.append("images", data.images[i]);
       }
-      
-      dispatch(showModal({ isShowModal: true, modalChildren: <Loading /> }));
-      const response = await apiUpdateProduct(formData, editProduct._id);
+    }
+  
+    // Dispatch loading modal
+    dispatch(showModal({ isShowModal: true, modalChildren: <Loading /> }));
+  
+    try {
+      // Call the API with the product ID
+      const productId = editProduct?._id; // Use the ID of the product being edited
+      const response = await apiUpdateProduct(formData, productId);
       dispatch(showModal({ isShowModal: false, modalChildren: null }));
-      console.log(response);
+  
+      // Debugging: Log the response
+      console.log("Update Product Response:", response);
+  
       if (response.success) {
         Swal.fire({
           title: "Updated",
@@ -141,7 +216,7 @@ const UpdateProduct = ({ editProduct, render, setEditProduct }) => {
       } else {
         Swal.fire({
           title: "Oops!",
-          text: "Failed to Update Variant Product!",
+          text: "Failed to Update Product!",
           icon: "error",
           confirmButtonText: "OK",
           customClass: {
@@ -151,8 +226,17 @@ const UpdateProduct = ({ editProduct, render, setEditProduct }) => {
           },
         });
       }
+    } catch (error) {
+      dispatch(showModal({ isShowModal: false, modalChildren: null }));
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Failed to update product!",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     }
   };
+  
 
   const handlePreview = async (files) => {
     const imgPreview = [];

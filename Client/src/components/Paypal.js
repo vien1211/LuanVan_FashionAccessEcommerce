@@ -80,7 +80,9 @@ const ButtonWrapper = ({
             .create({
               purchase_units: [
                 { amount: { currency_code: currency, value: amount } },
+                
               ],
+              
             })
             .then((orderId) => orderId)
         }

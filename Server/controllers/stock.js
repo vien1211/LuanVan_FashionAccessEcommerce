@@ -28,10 +28,9 @@ const updateStockAfterOrder = asyncHandler(async (orderItems) => {
         throw new Error(`Product not found for ID: ${item.product}`);
       }
 
-      
-      product.sold += item.quantity;
+      // product.sold += item.quantity;
+      product.sold += 1;
 
-      
       await stockItem.save(); 
       await product.save();    
     })

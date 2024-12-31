@@ -206,7 +206,7 @@ const ManageCategory = () => {
                       <img
                         src={el.image}
                         alt={el.title}
-                        className="w-[60px] h-[60px] object-cover"
+                        className="w-[60px] h-[60px] object-cover rounded-md"
                       />
                     )}
                   </td>

@@ -16,9 +16,9 @@ const InputField = ({ value, setValue, nameKey, type, invalidFields, style, full
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(value !== "")}
       />
-      {invalidFields?.find(el => el.name === nameKey)?.mes && (
+      {invalidFields?.find(el => el.nameKey === nameKey)?.message && (
         <small className='text-main text-[10px]'>{invalidFields.find(
-          el => el.name === nameKey)?.mes
+          el => el.nameKey === nameKey)?.message
         }</small>
       )}
       

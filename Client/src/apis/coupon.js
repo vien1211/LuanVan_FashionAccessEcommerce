@@ -18,6 +18,12 @@ export const apiApplyCoupon =(data) => axios ({
     data
 })
 
+export const apiCancelApplyCoupon =(data) => axios ({
+    url: '/coupon/remove-coupon',
+    method: 'post',
+    data
+})
+
 export const apiUpdateCoupon =(data, cid) => axios ({
     url: `/coupon/${cid}`,
     method: 'put',

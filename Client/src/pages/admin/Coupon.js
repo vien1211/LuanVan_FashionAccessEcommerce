@@ -304,6 +304,12 @@ const Coupon = () => {
                           {moment(coupon.expire).format("DD [Th] MM, YYYY")}
                         </span>
                       </div>
+                      <div className="my-2">
+                        Used:{" "}
+                        <span className="font-medium">
+                          {coupon.usedBy.length || 0} / {coupon.usageLimit}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       

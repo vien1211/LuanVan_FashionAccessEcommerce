@@ -301,7 +301,7 @@ const ManageUser = () => {
                     {/* )} */}
                   </td>
                   <td className="py-2 px-2">
-                    {/* {editEl?._id === el._id ? (
+                    {editEl?._id === el._id ? (
                       <InputForm
                         register={register}
                         fullWidth
@@ -311,16 +311,16 @@ const ManageUser = () => {
                         validate={{
                           required: "Require",
                           pattern: {
-                            // value: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/gm,
-                            value: /^\+84\d{9}$/,
+                            value: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/gm,
+                            // value: /^\+84\d{9}$/,
                             message: "invalid phone number",
                           },
                         }}
                          style='rounded-md'
-                      /> */}
-                    {/* ) : ( */}
+                      />
+                     ) : ( 
                       <span>{el.mobile}</span>
-                    {/* )} */}
+                     )}
                   </td>
                   <td className="py-2 px-2">
                     {editEl?._id === el._id ? (

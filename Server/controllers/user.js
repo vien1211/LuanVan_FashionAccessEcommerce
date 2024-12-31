@@ -18,33 +18,6 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilio = require("twilio")
 const clientPN = require('twilio')(accountSid, authToken);
 
-// const register = asyncHandler(async(req, res) => {
-//     const { email, password, firstname, lastname } = req.body;
-
-//     if (!email || !password || !firstname || !lastname) {
-//         return res.status(400).json({
-//             success: false,
-//             mes: 'Missing inputs'
-//         });
-//     }
-
-//     const user = await User.findOne({ email });
-//     if (user) {
-//         return res.status(400).json({
-//             success: false,
-//             mes: 'User already exists'
-//         });
-//     } else {
-//         const newUser = await User.create(req.body);
-//         return res.status(201).json({
-//             success: true,
-//             mes: 'Registration successful'
-//         });
-//     }
-// });
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 const register = asyncHandler(async (req, res) => {
   const { email, password, confirmPassword, firstname, lastname, mobile } = req.body;
 
@@ -56,13 +29,6 @@ const register = asyncHandler(async (req, res) => {
     });
   }
 
-  // if (!passwordRegex.test(password)) {
-  //   return res.status(400).json({
-  //     success: false,
-  //     mes: "Password must be at least 6 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
-  //   });
-  // }
-
   if (password !== confirmPassword) {
     return res.status(400).json({
       success: false,
@@ -70,9 +36,9 @@ const register = asyncHandler(async (req, res) => {
     });
   }
   
-  if (!mobile.startsWith("+84")) {
-    mobile = `+84${mobile.slice(1)}`;
-  }
+  // if (!mobile.startsWith("+84")) {
+  //   mobile = `+84${mobile.slice(1)}`;
+  // }
 
   const user = await User.findOne({ email });
   if (user) {
@@ -218,13 +184,6 @@ const login = asyncHandler(async (req, res) => {
       success: false,
       mes: "Missing inputs",
     });
-  
-    // if (!passwordRegex.test(password)) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     mes: "Password must be at least 6 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
-    //   });
-    // }
 
   const user = await User.findOne({ email });
 
@@ -498,9 +457,9 @@ const updateUser = asyncHandler(async (req, res) => {
 const updateUserByAdmin = asyncHandler(async (req, res) => {
   const { uid } = req.params;
   if (Object.keys(req.body).length === 0) throw new Error("Missing inputs");
-  if (req.body.mobile && !req.body.mobile.startsWith("+84")) {
-    req.body.mobile = `+84${req.body.mobile.slice(1)}`;
-  }
+  // if (req.body.mobile && !req.body.mobile.startsWith("+84")) {
+  //   req.body.mobile = `+84${req.body.mobile.slice(1)}`;
+  // }
   const response = await User.findByIdAndUpdate(uid, req.body, {
     new: true,
   }).select("-password -role");

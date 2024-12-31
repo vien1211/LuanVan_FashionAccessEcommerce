@@ -1,132 +1,4 @@
-// import React, { useState } from "react";
-// import { useForm } from "react-hook-form";
-// import { Button, InputForm, Loading } from "../../components";
-// import { apiSendVerificationCode } from "../../apis";
-// import Swal from "sweetalert2";
-// import EnterVerificationCode from "./EnterVerificationCode";
-// import { showModal } from "../../store/app/appSlice";
-// import { useDispatch } from "react-redux";
-// import { IoReturnDownBackOutline } from "react-icons/io5";
-// import path from "../../ultils/path";
-// import { useNavigate } from "react-router-dom";
 
-// const UpdateEmail = () => {
-//   const {
-//     register,
-//     handleSubmit,
-//     formState: { errors },
-//   } = useForm();
-//   const [isCodeSent, setIsCodeSent] = useState(false);
-//   const [newEmail, setNewEmail] = useState("");
-//   const dispatch = useDispatch();
-//   const navigate = useNavigate();
-
-//   const handleSendCode = async (data) => {
-//     try {
-//       dispatch(showModal({ isShowModal: true, modalChildren: <Loading /> }));
-//       const response = await apiSendVerificationCode({ email: data.email });
-//       dispatch(showModal({ isShowModal: false, modalChildren: null }));
-
-//       if (response) {
-//         setIsCodeSent(true);
-//         setNewEmail(data.email);
-//         Swal.fire({
-//           title: "Success",
-//           text: "Verification code sent to your new email.",
-//           icon: "success",
-//           customClass: {
-//             title: "custom-title",
-//             text: "custom-text",
-//             confirmButton: "custom-confirm-button",
-//           },
-//         });
-//       } else {
-//         Swal.fire({
-//           title: "Error",
-//           text: "Failed to send verification code.",
-//           icon: "error",
-//           customClass: {
-//             title: "custom-title",
-//             text: "custom-text",
-//             confirmButton: "custom-confirm-button",
-//           },
-//         });
-//       }
-//     } catch (error) {
-//       Swal.fire({
-//         title: "Error",
-//         text: error.response?.data?.message || "An unexpected error occurred.",
-//         icon: "error",
-//         customClass: {
-//           title: "custom-title",
-//           text: "custom-text",
-//           confirmButton: "custom-confirm-button",
-//         },
-//       });
-//     }
-//   };
-
-//   // Callback to handle successful verification
-//   const handleEmailUpdateSuccess = (updatedEmail) => {
-//     Swal.fire({
-//       title: "Email Updated",
-//       text: `Your email has been updated to ${updatedEmail}.`,
-//       icon: "success",
-//       customClass: {
-//         title: "custom-title",
-//         text: "custom-text",
-//         confirmButton: "custom-confirm-button",
-//       },
-//     });
-//     setIsCodeSent(false);
-//   };
-
-//   const handleBackEdit = () => {
-//     navigate(`/${path.MEMBER}/${path.PERSONAL}`);
-//   };
-
-//   return (
-//     <div className="flex flex-col p-4">
-//       <div className="flex text-3xl font-bold px-6">
-//         <IoReturnDownBackOutline
-//           className="cursor-pointer hover:text-[#273526]"
-//           onClick={() => handleBackEdit()}
-//         />
-//       </div>
-//       <div className="flex flex-col items-center">
-//         <h3 className="art-word-shadow">Update</h3>
-//         <h3 className="gradient-text -mt-8">New Email</h3>
-//       </div>
-//       {!isCodeSent ? (
-//         <form
-//           onSubmit={handleSubmit(handleSendCode)}
-//           className="flex flex-col w-full max-w-md mb-4 mx-auto"
-//         >
-//           <InputForm
-//             label="New Email"
-//             register={register}
-//             errors={errors}
-//             id="email"
-//             validate={{
-//               required: "Email is required",
-//               pattern: {
-//                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-//                 message: "Invalid email address",
-//               },
-//             }}
-//             fullWidth
-//             style="rounded-md mb-2"
-//           />
-//           <Button type="submit" name="Send Verification Code" />
-//         </form>
-//       ) : (
-//         <EnterVerificationCode email={newEmail} />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default UpdateEmail;
 
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -158,7 +30,7 @@ const UpdateEmail = ({ setEdit }) => {
       const response = await apiSendVerificationCode({ email: data.email });
       dispatch(showModal({ isShowModal: false, modalChildren: null }));
 
-      if (response?.success) {
+      if (response) {
         setIsCodeSent(true);
         setNewEmail(data.email);
         setTimeLeft(600);
@@ -198,20 +70,9 @@ const UpdateEmail = ({ setEdit }) => {
     }
   };
 
-  const handleEmailUpdateSuccess = (updatedEmail) => {
-    Swal.fire({
-      title: "Email Updated",
-      text: `Your email has been updated to ${updatedEmail}.`,
-      icon: "success",
-      customClass: {
-        title: "custom-title",
-        text: "custom-text",
-        confirmButton: "custom-confirm-button",
-      },
-    });
-    setIsCodeSent(false);
-  };
 
+  
+  
   const handleBackEdit = () => {
     if (isCodeSent) {
       setIsCodeSent(false);
@@ -234,7 +95,10 @@ const UpdateEmail = ({ setEdit }) => {
         <h3 className="art-word-shadow">Update</h3>
         <h3 className="gradient-text -mt-8">New Email</h3>
       </div>
-      {!isCodeSent ? (
+      {isCodeSent ? (
+        <EnterVerificationCode email={newEmail} timeLeft={timeLeft} />
+      ) : (
+        
         <form
           onSubmit={handleSubmit(handleSendCode)}
           className="flex flex-col w-full max-w-md mb-4 mx-auto"
@@ -264,8 +128,6 @@ const UpdateEmail = ({ setEdit }) => {
             />
           </div>
         </form>
-      ) : (
-        <EnterVerificationCode email={newEmail} timeLeft={timeLeft} />
       )}
     </div>
   );

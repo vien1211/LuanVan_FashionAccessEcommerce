@@ -1,19 +1,6 @@
 const Coupon = require('../models/coupon')
 const asyncHandler = require('express-async-handler')
 
-// const createNewCoupon = asyncHandler(async(req, res) => {
-//     const { name, discount, expire} = req.body
-//     if(!name || !discount || !expire) throw new Error('Missing Inputs!')
-//     const response = await Coupon.create({
-//         ...req.body,
-//         expire: Date.now() + +expire*24*60*60*1000
-//     })
-//     return res.json({
-//         success: response ? true : false,
-//         createdCoupon: response ? response: 'Cannot Create New Coupon! '
-//     })
-// })
-
 const createNewCoupon = asyncHandler(async (req, res) => {
     const { name, discount, expire, usageLimit } = req.body;
     if (!name || !discount || !expire || !usageLimit) throw new Error('Missing Inputs!');
@@ -103,6 +90,7 @@ const applyCoupon = asyncHandler(async (req, res) => {
 
     // All conditions are satisfied, apply the coupon
     coupon.usedBy.push(userId); // Add userId to the usedBy array
+    //coupon.usedCount += 1;
     await coupon.save(); // Save the updated coupon
 
     // Return coupon information with the discount
@@ -113,7 +101,35 @@ const applyCoupon = asyncHandler(async (req, res) => {
     });
 });
 
+const removeCouponUsage = async (req, res) => {
+    const { userId, couponId } = req.body;
+  
+    try {
+      // Find the coupon and check if the user is in the usedBy array
+      const coupon = await Coupon.findById(couponId);
+  
+      if (!coupon) {
+        return res.status(404).json({ success: false, message: 'Coupon not found' });
+      }
+  
+      if (!coupon.usedBy.includes(userId)) {
+        return res.status(400).json({ success: false, message: 'Coupon has not been used by this user' });
+      }
+  
+      // Remove the user from the usedBy array
+      coupon.usedBy = coupon.usedBy.filter(user => user.toString() !== userId);
+  
+      //coupon.usedCount -= 1;
 
+      // Save the coupon document after updating
+      await coupon.save();
+  
+      return res.status(200).json({ success: true, message: 'Coupon usage removed successfully' });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: 'Server error' });
+    }
+  };
 
 
 
@@ -122,5 +138,6 @@ module.exports ={
     getAllCoupon,
     updateCoupon,
     deleteCoupon,
-    applyCoupon
+    applyCoupon,
+    removeCouponUsage
 }

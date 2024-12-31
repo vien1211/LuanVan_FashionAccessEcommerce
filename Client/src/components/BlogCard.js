@@ -32,7 +32,7 @@ const BlogCard = ({ blog }) => {
         </div>
 
         <div className="px-4">
-          <h2 className="text-[20px] font-semibold text-[#3C5643] mb-2">
+          <h2 className="text-[20px] font-semibold text-[#3C5643] mb-2 line-clamp-2">
             {blog.title}
           </h2>
 

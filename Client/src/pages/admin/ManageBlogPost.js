@@ -221,7 +221,7 @@ const ManageBlogPost = () => {
                   <img
                     src={el.image}
                     alt={el?.title}
-                    className="w-[70px] h-[60px] object-cover"
+                    className="w-[70px] h-[60px] object-cover rounded-md"
                   />
                 </td>
 

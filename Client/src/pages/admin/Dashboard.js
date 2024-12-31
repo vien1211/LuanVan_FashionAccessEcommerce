@@ -260,7 +260,7 @@ const Dashboard = () => {
     const numberView = latestBlogs.map((blog) => blog.numberView);
 
     setBlogData({
-      labels: latestBlogs.map((blog) => blog.title), // Tên bài viết
+      labels: latestBlogs.map((blog) => blog.title.length > 20 ? blog.title.substring(0, 20) + "..." : blog.title), // Tên bài viết
       datasets: [
         {
           label: "Likes",
@@ -284,6 +284,7 @@ const Dashboard = () => {
         },
       ],
     });
+
   };
 
   const fetchOrdersToday = async () => {
@@ -915,7 +916,7 @@ const Dashboard = () => {
         </div>
 
         {/* Phần bên phải: Biểu đồ */}
-        <div className="w-[65%] p-6 bg-white rounded-lg shadow-lg border border-gray-200">
+        <div className="w-[65%] h-fit p-6 bg-white rounded-lg shadow-lg border border-gray-200">
           <h2 className="text-2xl font-bold text-gray-800 mb-3">
             5 Blog Post Newest
           </h2>

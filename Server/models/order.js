@@ -22,9 +22,7 @@ var orderSchema = new mongoose.Schema({
         }
     ],
     total: Number,
-    coupon: {
-        type: mongoose.Types.ObjectId, ref: 'Coupon'
-    },
+    coupon: { type: mongoose.Schema.Types.ObjectId, ref: "Coupon", default: null },
     paymentMethod: {
         type: String,
         enum: ['paypal', 'cod'],
